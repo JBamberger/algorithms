@@ -19,7 +19,7 @@ class SortKtTest constructor(val algo: InPlaceSortingAlgorithm<Int>) {
         @JvmStatic
         @Parameterized.Parameters
         fun params(): List<InPlaceSortingAlgorithm<Int>> {
-            return listOf(::selectionSort, ::quickSort, ::mergeSort/*, ::heapSort*/)
+            return listOf(::selectionSort, ::quickSort, ::mergeSort, ::heapSort)
         }
 
         fun assertSorted(data: Array<Int>) {
@@ -72,22 +72,7 @@ class SortKtTest constructor(val algo: InPlaceSortingAlgorithm<Int>) {
 
     @Test
     fun randomInput() {
-        fun <T> Array<T>.shuffle(): Array<T> {
-            val rng = Random()
-
-            for (index in 0 until this.size) {
-                val randomIndex = rng.nextInt(this.size)
-
-                // Swap with the random position
-                val temp = this[index]
-                this[index] = this[randomIndex]
-                this[randomIndex] = temp
-            }
-            return this
-        }
-
         val randomInput = Array(5000) {5000-it}.shuffle()
-
         algo(randomInput, Comparator.naturalOrder())
         assertSorted(randomInput)
     }

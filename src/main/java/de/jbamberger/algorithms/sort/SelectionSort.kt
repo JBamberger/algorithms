@@ -61,7 +61,37 @@ fun <T> quickSort(input: Array<T>, compare: Comparator<T>) {
 }
 
 fun <T> heapSort(input: Array<T>, compare: Comparator<T>) {
+    operator fun T.compareTo(i: T): Int {
+        return compare.compare(this, i)
+    }
 
+    fun heapify(x: Int, r: Int) {
+        var i = x
+        val a = input[i]
+        var j = 2 * i + 1
+
+        while (j <= r) {
+            if (j < r && input[j + 1] > input[j]) {
+                j++
+            }
+            if (a < input[j]) {
+                input[i] = input[j]
+                i = j
+                j = 2 * i + 1
+            } else {
+                break
+            }
+        }
+        input[i] = a
+    }
+
+    for (i in input.size / 2 - 1 downTo 0) {
+        heapify(i, input.size - 1)
+    }
+    for (i in input.size - 1 downTo 1) {
+        input.swap(i, 0)
+        heapify(0, i - 1)
+    }
 }
 
 fun <T> selectionSort(input: Array<T>, compare: Comparator<T>) {
