@@ -1,5 +1,6 @@
 package de.jbamberger.algorithms.sort
 
+import de.jbamberger.algorithms.shuffle
 import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.lessThan
 import org.junit.Test

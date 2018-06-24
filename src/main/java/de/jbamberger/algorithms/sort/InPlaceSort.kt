@@ -1,5 +1,9 @@
 package de.jbamberger.algorithms.sort
 
+import de.jbamberger.algorithms.max
+import de.jbamberger.algorithms.minMax
+import de.jbamberger.algorithms.shuffle
+import de.jbamberger.algorithms.swap
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.log

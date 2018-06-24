@@ -1,4 +1,4 @@
-package de.jbamberger.algorithms.sort
+package de.jbamberger.algorithms
 
 import java.util.*
 
