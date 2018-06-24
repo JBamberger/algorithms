@@ -21,38 +21,19 @@ class SortKtTest constructor(val algo: InPlaceSortingAlgorithm<Int>) {
         fun params(): List<InPlaceSortingAlgorithm<Int>> {
             return listOf(::selectionSort, ::quickSort, ::mergeSort/*, ::heapSort*/)
         }
+
+        fun assertSorted(data: Array<Int>) {
+            for (i in 1 until data.size) {
+                assertThat(data[i - 1], lessThan(data[i]))
+            }
+        }
     }
 
     @Test
     fun emptyArray() {
-        val empty = Array(0) { -1 }
-        assertThat(empty.size, Is(0))
+        val empty = arrayOf<Int>()
         algo(empty, Comparator.naturalOrder())
         assertThat(empty.size, Is(0))
-    }
-
-    @Test
-    fun reverseShort() {
-        val data = Array(5) { 5 - it }
-        assertThat(data.size, Is(5))
-        assertThat(data[0], Is(5))
-        assertThat(data[4], Is(1))
-        algo(data, Comparator.naturalOrder())
-        for (i in 1..4) {
-            assertThat(data[i - 1], lessThan(data[i]))
-        }
-    }
-
-    @Test
-    fun inOrderShort() {
-        val data = Array(5) { it+1 }
-        assertThat(data.size, Is(5))
-        assertThat(data[0], Is(1))
-        assertThat(data[4], Is(5))
-        algo(data, Comparator.naturalOrder())
-        for (i in 1..4) {
-            assertThat(data[i - 1], lessThan(data[i]))
-        }
     }
 
     @Test
@@ -62,5 +43,54 @@ class SortKtTest constructor(val algo: InPlaceSortingAlgorithm<Int>) {
         algo(data, Comparator.naturalOrder())
         assertThat(data[0], Is(1))
     }
+
+    @Test
+    fun shortInput() {
+        val reversed = arrayOf(5,4,3,2,1)
+        algo(reversed, Comparator.naturalOrder())
+        assertSorted(reversed)
+        val sortedOdd = arrayOf(1,2,3,4,5)
+        algo(sortedOdd, Comparator.naturalOrder())
+        assertSorted(sortedOdd)
+        val sortedEven = arrayOf(1,2,3,4,5,6)
+        algo(sortedEven, Comparator.naturalOrder())
+        assertSorted(sortedEven)
+    }
+
+    @Test
+    fun longInput() {
+        val reversed = Array(5000) {5000-it}
+        algo(reversed, Comparator.naturalOrder())
+        assertSorted(reversed)
+        val sortedOdd = Array(5001) {it+1}
+        algo(sortedOdd, Comparator.naturalOrder())
+        assertSorted(sortedOdd)
+        val sortedEven = Array(5000) {it+1}
+        algo(sortedEven, Comparator.naturalOrder())
+        assertSorted(sortedEven)
+    }
+
+    @Test
+    fun randomInput() {
+        fun <T> Array<T>.shuffle(): Array<T> {
+            val rng = Random()
+
+            for (index in 0 until this.size) {
+                val randomIndex = rng.nextInt(this.size)
+
+                // Swap with the random position
+                val temp = this[index]
+                this[index] = this[randomIndex]
+                this[randomIndex] = temp
+            }
+            return this
+        }
+
+        val randomInput = Array(5000) {5000-it}.shuffle()
+
+        algo(randomInput, Comparator.naturalOrder())
+        assertSorted(randomInput)
+    }
+
 
 }
