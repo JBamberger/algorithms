@@ -10,6 +10,16 @@ import kotlin.math.log
 
 typealias InPlaceSortingAlgorithm<T> = (Array<T>, java.util.Comparator<T>) -> Unit
 
+/**
+ * best case:    n log n
+ * worst case:   n
+ * average case: n
+ * stable: yes
+ * additional memory: O(n)
+ * restrictions: Double values from 0 to 1
+ * Create n buckets and then map the values in the buckets. Each bucket is sorted and then the buckets are written one
+ * after another.
+ */
 fun bucketSort(input: DoubleArray, sort: (MutableList<Double>) -> MutableList<Double>) {
     val n = input.size
     val B = Array<MutableList<Double>>(n) { mutableListOf() }
@@ -26,6 +36,16 @@ fun bucketSort(input: DoubleArray, sort: (MutableList<Double>) -> MutableList<Do
     }
 }
 
+/**
+ * best case:    n + k
+ * worst case:   n + k
+ * average case: n + k
+ * stable: yes
+ * additional memory: O(n + k)
+ * restrictions: Integer numbers with a range of k (may not be larger than Int.MAX_VALUE)
+ * Creates k buckets and counts the number of occurrences of each element. Then the numbers are moved into the correct
+ * places by looking them up in the array in reverse order.
+ */
 fun countingSort(M: IntArray) {
     val (min, max) = minMax(M)
     val k = max - min
@@ -41,6 +61,15 @@ fun countingSort(M: IntArray) {
     for (i in 0 until n) M[i] = Mx[i]
 }
 
+/**
+ * best case:    s * (n + d)
+ * worst case:   s * (n + d)
+ * average case: s * (n + d)
+ * stable: yes
+ * additional memory: O(n+d)
+ * restrictions: words of length s with radix d
+ * Sort according to the digits with a different sorting scheme -> lexicographical order
+ */
 fun radixSort(M: IntArray, base: Int) {
     val max = max(M)
     val s = floor(log(max.toDouble(), base.toDouble())).toInt()
@@ -49,6 +78,15 @@ fun radixSort(M: IntArray, base: Int) {
     }
 }
 
+/**
+ * best case:    s * n
+ * worst case:   s * n
+ * average case: s * n
+ * stable: no
+ * additional memory: O(s)
+ * restrictions: Binary numbers of length s (32 bits in this case)
+ * Sorts the numbers bit-wise similar to quickSort.
+ */
 fun radixExchangeSort(M: IntArray) {
     fun localRESort(l: Int, r: Int, b: Int) {
         var i = l
@@ -60,14 +98,21 @@ fun radixExchangeSort(M: IntArray) {
         }
 
         if (b > 0) {
-            localRESort(l, i-1, b-1)
-            localRESort(i, r, b-1)
+            localRESort(l, i - 1, b - 1)
+            localRESort(i, r, b - 1)
         }
     }
     localRESort(0, M.size - 1, 31)
 }
 
-
+/**
+ * best case:    n log n
+ * worst case:   n log n
+ * average case: n log n
+ * stable: no
+ * additional memory: O(n)
+ * Split the array in the middle. Sort both parts recursively. After the recursion, sorted parts are merged.
+ */
 fun <T> mergeSort(input: Array<T>, compare: Comparator<T>) {
     operator fun T.compareTo(i: T): Int {
         return compare.compare(this, i)
@@ -99,10 +144,28 @@ fun <T> mergeSort(input: Array<T>, compare: Comparator<T>) {
     localMergeSort(0, input.size - 1)
 }
 
+/**
+ * best case:    n log n
+ * worst case:   n^2
+ * average case: n log n
+ * stable: no
+ * additional memory: O(n)
+ * Shuffle the input, then do quickSort. This helps for already sorted / partly sorted lists to avoid the worst case.
+ * @see quickSort
+ */
 fun <T> randomizedQuickSort(input: Array<T>, compare: Comparator<T>) {
     quickSort(input.shuffle(), compare)
 }
 
+/**
+ * best case:    n log n
+ * worst case:   n^2
+ * average case: n log n
+ * stable: no
+ * additional memory: O(n)
+ * Select a pivot element, put larger ones to the one side and smaller ones to the other side. Then go into recursion
+ * for both sides.
+ */
 fun <T> quickSort(input: Array<T>, compare: Comparator<T>) {
     fun localQuickSort(l: Int, r: Int) {
         if (l >= r) return
@@ -128,6 +191,15 @@ fun <T> quickSort(input: Array<T>, compare: Comparator<T>) {
     localQuickSort(0, input.size - 1)
 }
 
+/**
+ * best case:    n
+ * worst case:   n log n
+ * average case: n log n
+ * stable: no
+ * additional memory: O(1)
+ * Build a heap in place, then take the uppermost element, swap it to the end and restore the heap properties. Then
+ * repeat until all elements are sorted.
+ */
 fun <T> heapSort(input: Array<T>, compare: Comparator<T>) {
     operator fun T.compareTo(i: T): Int {
         return compare.compare(this, i)
@@ -162,15 +234,23 @@ fun <T> heapSort(input: Array<T>, compare: Comparator<T>) {
     }
 }
 
+/**
+ * best case:    n^2
+ * worst case:   n^2
+ * average case: n^2
+ * stable: no
+ * additional memory: O(1)
+ * For each position, search through the remaining positions and select the appropriate item that comes next.
+ */
 fun <T> selectionSort(input: Array<T>, compare: Comparator<T>) {
+    operator fun T.compareTo(i: T): Int {
+        return compare.compare(this, i)
+    }
+
     val n = input.size
     for (i in 0..n - 2) {
         var m = i;
-        for (j in i until n) {
-            if (compare.compare(input[j], input[m]) < 0) {
-                m = j
-            }
-        }
+        for (j in i until n) if (input[j] < input[m]) m = j
         input.swap(i, m)
     }
 }
