@@ -1,6 +1,8 @@
 package de.jbamberger.algorithms.sort
 
 import kotlin.math.ceil
+import kotlin.math.floor
+import kotlin.math.log
 
 /**
  * @author Jannik Bamberger (dev.jbamberger@gmail.com)
@@ -24,7 +26,7 @@ fun bucketSort(input: DoubleArray, sort: (MutableList<Double>) -> MutableList<Do
     }
 }
 
-fun countingSort(M: IntArray, compare: Comparator<Int>) {
+fun countingSort(M: IntArray) {
     val (min, max) = minMax(M)
     val k = max - min
     val n = M.size
@@ -38,6 +40,33 @@ fun countingSort(M: IntArray, compare: Comparator<Int>) {
     }
     for (i in 0 until n) M[i] = Mx[i]
 }
+
+fun radixSort(M: IntArray, base: Int) {
+    val max = max(M)
+    val s = floor(log(max.toDouble(), base.toDouble())).toInt()
+    for (i in 0..s) {
+        TODO("Sort w.r.t. i-th digit (stable)")
+    }
+}
+
+fun radixExchangeSort(M: IntArray) {
+    fun localRESort(l: Int, r: Int, b: Int) {
+        var i = l
+        var j = r
+        while (i <= j) {
+            while (i <= j && (0 == (M[i] and (1 shl b)))) i++
+            while (i <= j && (1 == (M[i] and (1 shl b)))) j--
+            if (i < j) M.swap(i, j)
+        }
+
+        if (b > 0) {
+            localRESort(l, i-1, b-1)
+            localRESort(i, r, b-1)
+        }
+    }
+    localRESort(0, M.size - 1, 31)
+}
+
 
 fun <T> mergeSort(input: Array<T>, compare: Comparator<T>) {
     operator fun T.compareTo(i: T): Int {
