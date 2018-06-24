@@ -5,8 +5,32 @@ package de.jbamberger.algorithms.sort
  */
 
 fun <T> mergeSort(input: Array<T>, compare: Comparator<T>) {
-    fun localMergeSort(l: Int, r: Int) {
+    operator fun T.compareTo(i: T): Int {
+        return compare.compare(this, i)
+    }
 
+    val tmp = input.copyOf()
+
+    fun localMergeSort(l: Int, r: Int) {
+        if (l >= r) return
+        val m = (l + r - 1) / 2
+        localMergeSort(l, m)
+        localMergeSort(m + 1, r)
+        var i = l
+        var j = m + 1
+        var k = l
+        while (i <= m && j <= r) {
+            if (input[i] < input[j]) {
+                tmp[k] = input[i]
+                i++
+            } else {
+                tmp[k] = input[j]
+                j++
+            }
+            k++
+        }
+        for (h in i..m) input[k + (h - i)] = input[h]
+        for (h in l until k) input[h] = tmp[h]
     }
     localMergeSort(0, input.size - 1)
 }
@@ -15,8 +39,8 @@ fun <T> quickSort(input: Array<T>, compare: Comparator<T>) {
     fun localQuickSort(l: Int, r: Int) {
         if (l >= r) return
 
-        var i = l + 1;
-        var j = r;
+        var i = l + 1
+        var j = r
         val p = input[l]
 
         while (i <= j) {
@@ -26,10 +50,10 @@ fun <T> quickSort(input: Array<T>, compare: Comparator<T>) {
         }
         if (l < j) {
             input.swap(l, j)
-            localQuickSort(l, j-1)
+            localQuickSort(l, j - 1)
         }
         if (j < r) {
-            localQuickSort(j+1, r)
+            localQuickSort(j + 1, r)
         }
 
     }
