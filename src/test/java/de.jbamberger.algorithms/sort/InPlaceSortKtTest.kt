@@ -19,10 +19,9 @@ class SortKtTest constructor(val algo: InPlaceSortingAlgorithm<Int>) {
         @JvmStatic
         @Parameterized.Parameters
         fun params(): List<InPlaceSortingAlgorithm<Int>> {
-            return listOf(::selectionSort)
+            return listOf(::selectionSort, ::quickSort/*, ::mergeSort, ::heapSort*/)
         }
     }
-
 
     @Test
     fun emptyArray() {
