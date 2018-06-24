@@ -1,8 +1,29 @@
 package de.jbamberger.algorithms.sort
 
+import kotlin.math.ceil
+
 /**
  * @author Jannik Bamberger (dev.jbamberger@gmail.com)
  */
+
+typealias InPlaceSortingAlgorithm<T> = (Array<T>, java.util.Comparator<T>) -> Unit
+
+
+fun bucketSort(input: DoubleArray, sort: (MutableList<Double>) -> MutableList<Double>) {
+    val n = input.size
+    val B = Array<MutableList<Double>>(n) { mutableListOf() }
+    for (i in 0 until n) {
+        B[ceil(n * input[i]).toInt() - 1].add(input[i])
+    }
+    var i = 0
+    for (j in 0 until n) {
+        B[j] = sort(B[j])
+        for (k in 0 .. B[j].size) {
+            input[i] = B[j][k]
+            i++
+        }
+    }
+}
 
 fun <T> mergeSort(input: Array<T>, compare: Comparator<T>) {
     operator fun T.compareTo(i: T): Int {
@@ -33,6 +54,10 @@ fun <T> mergeSort(input: Array<T>, compare: Comparator<T>) {
         for (h in l until k) input[h] = tmp[h]
     }
     localMergeSort(0, input.size - 1)
+}
+
+fun <T> randomizedQuickSort(input: Array<T>, compare: Comparator<T>) {
+    quickSort(input.shuffle(), compare)
 }
 
 fun <T> quickSort(input: Array<T>, compare: Comparator<T>) {
