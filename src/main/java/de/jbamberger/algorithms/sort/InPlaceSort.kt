@@ -8,7 +8,6 @@ import kotlin.math.ceil
 
 typealias InPlaceSortingAlgorithm<T> = (Array<T>, java.util.Comparator<T>) -> Unit
 
-
 fun bucketSort(input: DoubleArray, sort: (MutableList<Double>) -> MutableList<Double>) {
     val n = input.size
     val B = Array<MutableList<Double>>(n) { mutableListOf() }
@@ -18,11 +17,26 @@ fun bucketSort(input: DoubleArray, sort: (MutableList<Double>) -> MutableList<Do
     var i = 0
     for (j in 0 until n) {
         B[j] = sort(B[j])
-        for (k in 0 .. B[j].size) {
+        for (k in 0..B[j].size) {
             input[i] = B[j][k]
             i++
         }
     }
+}
+
+fun countingSort(M: IntArray, compare: Comparator<Int>) {
+    val (min, max) = minMax(M)
+    val k = max - min
+    val n = M.size
+    val C = IntArray(k)
+    val Mx = IntArray(n)
+    for (i in 0 until n) C[M[i] + min] = C[M[i] + min] + 1
+    for (j in 1 until k) C[j] = C[j - 1] + C[j]
+    for (i in n..1) {
+        Mx[C[M[i] + min]] = M[i]
+        C[M[i] + min] = C[M[i] + min] - 1
+    }
+    for (i in 0 until n) M[i] = Mx[i]
 }
 
 fun <T> mergeSort(input: Array<T>, compare: Comparator<T>) {

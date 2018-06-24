@@ -7,7 +7,7 @@ import java.util.*
  */
 
 
-fun <T> Array<T>.swap(i: Int, j:Int) {
+fun <T> Array<T>.swap(i: Int, j: Int) {
     val tmp = this[i]
     this[i] = this[j]
     this[j] = tmp
@@ -25,4 +25,14 @@ fun <T> Array<T>.shuffle(): Array<T> {
         this[randomIndex] = temp
     }
     return this
+}
+
+fun minMax(M: IntArray): Pair<Int, Int> {
+    var min = Int.MAX_VALUE
+    var max = Int.MIN_VALUE
+    for (i in 0 until M.size) {
+        if (M[i] > max) max = M[i]
+        if (M[i] < min) min = M[i]
+    }
+    return Pair(min, max)
 }
