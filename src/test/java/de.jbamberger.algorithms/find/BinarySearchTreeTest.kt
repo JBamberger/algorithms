@@ -365,13 +365,14 @@ abstract class BinarySearchTreeTest {
         t.insert(6, "6")
         t.insert(0, "0")
         assertEquals("[3, 4, 5, 6, 7]", t.findInterval(3, 7).collect(Collectors.toList()).toString())
-        // findet einen Knoten (11), der kein Blatt ist
+        // find a node (11), which is no leaf
         assertEquals("[11]", t.findInterval(9, 12).collect(Collectors.toList()).toString())
-        // alle Schlüssel größer als Suchbereich
+        // all keys larger than the search area
         assertEquals("[]", t.findInterval(-5, -1).collect(Collectors.toList()).toString())
-        // alle Schlüssel kleiner als Suchbereich
+        // all keys smaller than the search area
         assertEquals("[]", t.findInterval(14, 17).collect(Collectors.toList()).toString())
-        /* test mit String als Schlüssel */
+
+        // test with string keys
         val t2 = getImplementation<String, Any>()
         t2.insert("a", "a")
         t2.insert("aa", "aa")
