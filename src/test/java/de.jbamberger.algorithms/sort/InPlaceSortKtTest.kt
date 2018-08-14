@@ -14,7 +14,7 @@ import org.hamcrest.CoreMatchers.`is` as Is
  */
 
 @RunWith(Parameterized::class)
-class SortKtTest constructor(val algo: InPlaceSortingAlgorithm<Int>) {
+class SortKtTest constructor(private val algo: InPlaceSortingAlgorithm<Int>) {
 
     companion object {
         @JvmStatic
@@ -39,41 +39,50 @@ class SortKtTest constructor(val algo: InPlaceSortingAlgorithm<Int>) {
 
     @Test
     fun sizeOne() {
-        val data = Array(1) { 1}
-        assertThat(data.size, Is(1))
+        val data = arrayOf(1)
         algo(data, Comparator.naturalOrder())
         assertThat(data[0], Is(1))
     }
 
     @Test
+    fun sizeTwo() {
+        val ordered = arrayOf(1,2)
+        algo(ordered, Comparator.naturalOrder())
+        assertSorted(ordered)
+        val reverse = arrayOf(2,1)
+        algo(reverse, Comparator.naturalOrder())
+        assertSorted(reverse)
+    }
+
+    @Test
     fun shortInput() {
-        val reversed = arrayOf(5,4,3,2,1)
+        val reversed = arrayOf(5, 4, 3, 2, 1)
         algo(reversed, Comparator.naturalOrder())
         assertSorted(reversed)
-        val sortedOdd = arrayOf(1,2,3,4,5)
+        val sortedOdd = arrayOf(1, 2, 3, 4, 5)
         algo(sortedOdd, Comparator.naturalOrder())
         assertSorted(sortedOdd)
-        val sortedEven = arrayOf(1,2,3,4,5,6)
+        val sortedEven = arrayOf(1, 2, 3, 4, 5, 6)
         algo(sortedEven, Comparator.naturalOrder())
         assertSorted(sortedEven)
     }
 
     @Test
     fun longInput() {
-        val reversed = Array(5000) {5000-it}
+        val reversed = Array(5000) { 5000 - it }
         algo(reversed, Comparator.naturalOrder())
         assertSorted(reversed)
-        val sortedOdd = Array(5001) {it+1}
+        val sortedOdd = Array(5001) { it + 1 }
         algo(sortedOdd, Comparator.naturalOrder())
         assertSorted(sortedOdd)
-        val sortedEven = Array(5000) {it+1}
+        val sortedEven = Array(5000) { it + 1 }
         algo(sortedEven, Comparator.naturalOrder())
         assertSorted(sortedEven)
     }
 
     @Test
     fun randomInput() {
-        val randomInput = Array(5000) {5000-it}.shuffle()
+        val randomInput = Array(5000) { 5000 - it }.shuffle()
         algo(randomInput, Comparator.naturalOrder())
         assertSorted(randomInput)
     }
