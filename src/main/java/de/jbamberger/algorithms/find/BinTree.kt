@@ -11,16 +11,17 @@ interface Dictionary<K : Comparable<K>, V> {
     fun delete(key: K): V?
 }
 
+/*
 class BinTree<K : Comparable<K>, V> : Dictionary<K, V> {
     private var size = 0
-    private var root: Node<K, V>? = null
+    private var _root: Node<K, V>? = null
 
     override fun size(): Int {
         return size
     }
 
-    private fun search(root: Node<K, V>, key: K): Node<K, V>? {
-        var v: Node<K, V>? = root
+    private fun search(_root: Node<K, V>, key: K): Node<K, V>? {
+        var v: Node<K, V>? = _root
         while (v != null && key != v.key) {
             v = (if (key < v.key) v.left else v.right)
         }
@@ -28,14 +29,14 @@ class BinTree<K : Comparable<K>, V> : Dictionary<K, V> {
     }
 
     override fun find(key: K): V? {
-        val v = root?.let { search(it, key) }
+        val v = _root?.let { search(it, key) }
         return v?.value
     }
 
     override fun insert(key: K, value: V): V? {
-        var v = root
+        var v = _root
         if (v == null) {
-            root = Node(key, value, null, null)
+            _root = Node(key, value, null, null)
             size = 1
             return value
         } else {
@@ -59,7 +60,7 @@ class BinTree<K : Comparable<K>, V> : Dictionary<K, V> {
     }
 
     override fun delete(key: K): V? {
-        var v: Node<K, V>? = root
+        var v: Node<K, V>? = _root
         var parent: Node<K, V> = v!!
         while (v != null && key != v.key) {
             parent = v
@@ -94,8 +95,8 @@ class BinTree<K : Comparable<K>, V> : Dictionary<K, V> {
         } else {// there is no left subtree
             val rChild = v.right
 
-            if (v === root) {
-                root = rChild
+            if (v === _root) {
+                _root = rChild
             } else {
                 if (key < parent.key) {
                     parent.left = rChild
@@ -111,4 +112,5 @@ class BinTree<K : Comparable<K>, V> : Dictionary<K, V> {
 
     class Node<K : Comparable<K>, V>(var key: K, var value: V, var left: Node<K, V>?, var right: Node<K, V>?)
 }
+*/
 
