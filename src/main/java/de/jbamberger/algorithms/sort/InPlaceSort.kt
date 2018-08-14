@@ -66,6 +66,30 @@ fun countingSort(M: IntArray) {
 }
 
 /**
+ * Variant of countingSort, which assumes a [0,k] as the input range.
+ */
+inline fun <reified T : IntKeyedVal> countingSort(M: Array<T>, k: Int) {
+    val Mx = Array<T?>(M.size) { null }
+    countingSort(M, Mx, k)
+}
+
+fun <T : IntKeyedVal> countingSort(M: Array<T>, Mx: Array<T?>, k: Int) {
+    val n = M.size
+    val C = IntArray(k)
+    for (i in 0 until n) C[M[i].intValue()] = C[M[i].intValue()] + 1
+    for (j in 1 until k) C[j] = C[j - 1] + C[j]
+    for (i in n..1) {
+        Mx[C[M[i].intValue()]] = M[i]
+        C[M[i].intValue()] = C[M[i].intValue()] - 1
+    }
+    for (i in 0 until n) M[i] = Mx[i]!!
+}
+
+interface IntKeyedVal {
+    fun intValue(): Int
+}
+
+/**
  * best case:    s * (n + d)
  * worst case:   s * (n + d)
  * average case: s * (n + d)
