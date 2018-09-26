@@ -3,13 +3,11 @@ package de.jbamberger.algorithms.map
 class AVLTree<K : Comparable<K>, V> : BinarySearchTree<K, V>() {
 
     /**
-     * Do a left rotation at node u and return the new subtree root.
-     * @param u starting point
-     * @return new subtree root
+     * Rotate left at [u] and return the new root node.
      */
     private fun rotateLeft(u: BinarySearchTree.NodeImpl<K, V>): BinarySearchTree.NodeImpl<K, V> {
-        val v = u.rightChild
-        v!!.parent = u.parent
+        val v = u.rightChild!!
+        v.parent = u.parent
         if (u.parent != null) { // check if u is left or right child or node
             if (u.parent!!.leftChild != null && u.parent!!.leftChild!!.key === u.key) {
                 u.parent!!.leftChild = v
@@ -20,9 +18,7 @@ class AVLTree<K : Comparable<K>, V> : BinarySearchTree<K, V>() {
             root = v
         }
         u.rightChild = v.leftChild
-        if (u.rightChild != null) {
-            u.rightChild!!.parent = u
-        }
+        u.rightChild?.parent = u
         v.leftChild = u
         u.parent = v
         updateLocalHeight(u)
@@ -31,13 +27,11 @@ class AVLTree<K : Comparable<K>, V> : BinarySearchTree<K, V>() {
     }
 
     /**
-     * Do a right rotation at node u and return the new subtree root.
-     * @param u starting point
-     * @return new subtree root
+     * Rotate right at [u] and return the new root node.
      */
     private fun rotateRight(u: BinarySearchTree.NodeImpl<K, V>): BinarySearchTree.NodeImpl<K, V> {
-        val v = u.leftChild
-        v!!.parent = u.parent
+        val v = u.leftChild!!
+        v.parent = u.parent
         if (u.parent != null) { // check if u is left or right child or node
             if (u.parent!!.leftChild != null && u.parent!!.leftChild!!.key === u.key) {
                 u.parent!!.leftChild = v
@@ -48,9 +42,7 @@ class AVLTree<K : Comparable<K>, V> : BinarySearchTree<K, V>() {
             root = v
         }
         u.leftChild = v.rightChild
-        if (u.leftChild != null) {
-            u.leftChild!!.parent = (u)
-        }
+        u.leftChild?.parent = u
         v.rightChild = u
         u.parent = v
         updateLocalHeight(u)
@@ -59,8 +51,7 @@ class AVLTree<K : Comparable<K>, V> : BinarySearchTree<K, V>() {
     }
 
     /**
-     * Do the appropriate rotations at node u.
-     * @param u starting point
+     * If the balance is 2 or -2 the appropriate rotation is performed.
      */
     private fun restoreBalance(u: BinarySearchTree.NodeImpl<K, V>) {
         val balance = getBalance(u)
@@ -82,8 +73,7 @@ class AVLTree<K : Comparable<K>, V> : BinarySearchTree<K, V>() {
     }
 
     /**
-     * Update the height information in the upstream tree and restore balance if necessary.
-     * @param node starting point
+     * Update the height information in the upper tree, restoring balance if necessary.
      */
     override fun update(node: BinarySearchTree.NodeImpl<K, V>?) {
         var u = node
@@ -94,21 +84,15 @@ class AVLTree<K : Comparable<K>, V> : BinarySearchTree<K, V>() {
         }
     }
 
-    /**
-     * Return the height of the node, -1 if the node is null
-     * @param node may be null
-     * @return height or -1 if null
-     */
-    private fun getSafeHeight(node: BinarySearchTree.NodeImpl<K, V>?): Int {
-        return node?.height ?: -1
-    }
 
     /**
-     * Return the balance of the given node.
-     * @param node Node should not be null.
-     * @return balance of node
+     * Compute the balance of a node.
      */
     private fun getBalance(node: BinarySearchTree.NodeImpl<K, V>): Int {
+        // height or -1 if null
+        fun getSafeHeight(node: BinarySearchTree.NodeImpl<K, V>?): Int {
+            return node?.height ?: -1
+        }
         return getSafeHeight(node.rightChild) - getSafeHeight(node.leftChild)
     }
 }
