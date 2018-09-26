@@ -19,7 +19,7 @@ class MoveToFrontList<K : Comparable<K>, V> : SearchableSet<K, V> {
     override fun insert(key: K, value: V): V? {
         val (prev, found) = findNode(key)
 
-        // create new node and insert it at the front
+        // create new node and put it at the front
         if (found == null) {
             val n = Node(null, head, key, value)
             head?.prev = n
