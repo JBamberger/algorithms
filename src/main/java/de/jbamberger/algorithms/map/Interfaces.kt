@@ -16,7 +16,7 @@ interface BinaryTree<K : Comparable<K>, V> : SortedMutableMap<K, V> {
     val root: Node<K, V>?
 
     interface Node<K, V> {
-        val key: K?
+        val key: K
         val value: V?
         val height: Int
         val parent: Node<K, V>?

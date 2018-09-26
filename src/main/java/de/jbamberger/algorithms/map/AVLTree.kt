@@ -106,7 +106,7 @@ class AVLTree<K : Comparable<K>, V> : BinarySearchTree<K, V>() {
     /**
      * Return the balance of the given node.
      * @param node Node should not be null.
-     * @return balande of node
+     * @return balance of node
      */
     private fun getBalance(node: BinarySearchTree.NodeImpl<K, V>): Int {
         return getSafeHeight(node.rightChild) - getSafeHeight(node.leftChild)

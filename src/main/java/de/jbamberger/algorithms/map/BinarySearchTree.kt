@@ -18,26 +18,30 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
      *
      * @param root root of the subtree
      * @param key  key to search for
-     * @return the [NodeX] with the given key, or @{code null} if no such node exists
+     * @return the [NodeImpl] with the given key, or @{code null} if no such node exists
      */
-    protected fun search(root: NodeImpl<K, V>?, key: K): NodeImpl<K, V> {
+    internal fun search(root: NodeImpl<K, V>?, key: K): SearchResult<K, V> {
         var v = root
         var u: NodeImpl<K, V>? = null
-        while (v != null && key.compareTo(v.key!!) != 0) {
+        while (v != null && key.compareTo(v.key) != 0) {
             u = v
-            if (key.compareTo(v.key!!) < 0) {
-                v = v.leftChild
+            v = if (key < v.key) {
+                v.leftChild
             } else {
-                v = v.rightChild
+                v.rightChild
             }
         }
-        return v ?: NodeImpl<K, V>(null, null, u, null, null)
+        return when (v) {
+            null -> SearchResult(false, u)
+            else -> SearchResult(true, v)
+        }
     }
 
     override fun get(key: K): V? {
-        val v = search(root, key)
-        return if (v.key != null) {
-            v.value
+        val searchResult = search(root, key)
+
+        return if (searchResult.found) {
+            searchResult.node!!.value
         } else {
             null // key not found
         }
@@ -50,16 +54,17 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
             this.size = 1
         } else {
             // otherwise, search the leaf u where the new node must be appended
-            var v = search(root, key)
-            if (v.key != null && key.compareTo(v.key!!) == 0) {
+            val searchResult = search(root, key)
+            var v = searchResult.node
+            if (searchResult.found && key.compareTo(v!!.key) == 0) {
                 // leaf u found, key already stored in the tree
                 return null
             } else {
-                // not fount, create new node with parent
-                v = NodeImpl(key, value, v.parent!!, null, null)
+                // not found, create new node with parent
+                v = NodeImpl(key, value, v, null, null)
                 // the new node is left or right child, according to
                 // the search tree property
-                if (key.compareTo(v.parent!!.key!!) < 0) {
+                if (key < v.parent!!.key) {
                     v.parent!!.leftChild = v
                 } else {
                     v.parent!!.rightChild = v
@@ -75,9 +80,11 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
 
     override fun remove(key: K): V? {
         var value: V? = null
-        var v: NodeImpl<K, V>? = search(root, key)
-        if (v!!.key != null) {
-            value = v.value
+        val searchResult = search(root, key)
+//        var v: NodeImpl<K, V>? =
+        if (searchResult.found) {
+            var v = searchResult.node
+            value = v!!.value
 
             var u: NodeImpl<K, V>?
             val w: NodeImpl<K, V>? // temporary nodes
@@ -121,7 +128,7 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
                     u = w
                 } else {
                     u = v.parent
-                    if (key.compareTo(u!!.key!!) < 0) {
+                    if (key < u!!.key) {
                         u.leftChild = w
                     } else {
                         u.rightChild = w
@@ -160,20 +167,20 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
     }
 
     protected open fun update(node: NodeImpl<K, V>?) {
-        var node: NodeImpl<K, V>? = node ?: return
-// update height at the given node
-        updateLocalHeight(node)
+        var n: NodeImpl<K, V>? = node ?: return
+        // update height at the given node
+        updateLocalHeight(n)
         // traverse up to root and update height
-        while (node !== root) {
-            node = node!!.parent // node is not root, therefore has a parent node
-            updateLocalHeight(node)
+        while (n !== root) {
+            n = n!!.parent // node is not root, therefore has a parent node
+            updateLocalHeight(n)
         }
     }
 
     override fun range(min: K, max: K): Stream<V> {
         val b = Stream.builder<V>()
         // check input
-        if (max.compareTo(min) < 0) {
+        if (max < min) {
             System.err.println("Minimum is not less or equal than maximum")
         }
         // search for the nodes
@@ -183,10 +190,10 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
 
     private fun findAll(list: Stream.Builder<V>, node: BinaryTree.Node<K, V>?, min: K, max: K) {
         if (node != null) {
-            if (node.key!!.compareTo(max) > 0) {
+            if (node.key > max) {
                 // current key is greater than max -> continue search only in left subtree
                 findAll(list, node.leftChild, min, max)
-            } else if (node.key!!.compareTo(min) < 0) {
+            } else if (node.key < min) {
                 // current key is smaller than min -> continue search only in right subtree
                 findAll(list, node.rightChild, min, max)
             } else {
@@ -198,8 +205,10 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
         }
     }
 
+    internal data class SearchResult<K : Comparable<K>, V>(val found: Boolean, val node: NodeImpl<K, V>?)
+
     class NodeImpl<K : Comparable<K>, V> : BinaryTree.Node<K, V> {
-        override var key: K? = null
+        override var key: K
             internal set
         override var value: V? = null
             internal set
@@ -212,13 +221,13 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
         override var rightChild: NodeImpl<K, V>? = null
             internal set
 
-        constructor(key: K?, value: V?) {
+        constructor(key: K, value: V?) {
             this.key = key
             this.value = value
         }
 
         constructor(
-                key: K?,
+                key: K,
                 value: V?,
                 parent: NodeImpl<K, V>?,
                 leftChild: NodeImpl<K, V>?,
@@ -230,29 +239,5 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
             this.leftChild = leftChild
             this.rightChild = rightChild
         }
-
-//        fun setHeight(height: Int) {
-//            this.height = height
-//        }
-//
-//        fun setKey(key: K?) {
-//            this.key = key
-//        }
-//
-//        fun setValue(value: V?) {
-//            this.value = value
-//        }
-//
-//        fun setParent(parent: NodeImpl<K, V>?) {
-//            this.parent = parent
-//        }
-//
-//        fun setLeftChild(leftChild: NodeImpl<K, V>?) {
-//            this.leftChild = leftChild
-//        }
-//
-//        fun setRightChild(rightChild: NodeImpl<K, V>?) {
-//            this.rightChild = rightChild
-//        }
     }
 }
