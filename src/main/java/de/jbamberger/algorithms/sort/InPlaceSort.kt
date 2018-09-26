@@ -283,3 +283,19 @@ fun <T> selectionSort(input: Array<T>, compare: Comparator<T>) {
     }
 }
 
+fun <T> insertionSort(elements: Array<T>, compare: Comparator<T>) {
+    operator fun T.compareTo(i: T): Int {
+        return compare.compare(this, i)
+    }
+
+    for (i in 1 until elements.size) {
+        val tmp = elements[i]
+        var j = i - 1
+        while (j >= 0 && elements[j] > tmp) {
+            elements[j + 1] = elements[j]
+            j--
+        }
+        elements[j + 1] = tmp
+    }
+}
+

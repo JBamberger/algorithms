@@ -20,7 +20,14 @@ class SortKtTest constructor(private val algo: InPlaceSortingAlgorithm<Int>) {
         @JvmStatic
         @Parameterized.Parameters
         fun params(): List<InPlaceSortingAlgorithm<Int>> {
-            return listOf(::selectionSort, ::quickSort, ::randomizedQuickSort, ::mergeSort, ::heapSort)
+            return listOf(
+                    ::insertionSort,
+                    ::selectionSort,
+                    ::quickSort,
+                    ::randomizedQuickSort,
+                    ::mergeSort,
+                    ::heapSort
+            )
         }
 
         fun assertSorted(data: Array<Int>) {
@@ -46,10 +53,10 @@ class SortKtTest constructor(private val algo: InPlaceSortingAlgorithm<Int>) {
 
     @Test
     fun sizeTwo() {
-        val ordered = arrayOf(1,2)
+        val ordered = arrayOf(1, 2)
         algo(ordered, Comparator.naturalOrder())
         assertSorted(ordered)
-        val reverse = arrayOf(2,1)
+        val reverse = arrayOf(2, 1)
         algo(reverse, Comparator.naturalOrder())
         assertSorted(reverse)
     }
