@@ -1,9 +1,10 @@
 package de.jbamberger.algorithms.map
 
+import de.jbamberger.algorithms.map.TestHelper.toString
+import de.jbamberger.algorithms.map.TestHelper.toStringPre
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.util.*
 import java.util.stream.Collectors
 
 /**
@@ -12,9 +13,6 @@ import java.util.stream.Collectors
  */
 abstract class BinarySearchTreeTest {
 
-    /**
-     * @return an instance of the class to be tested.
-     */
     abstract fun <K : Comparable<K>, V> getImplementation(): BinaryTree<K, V>
 
 
@@ -366,13 +364,13 @@ abstract class BinarySearchTreeTest {
         t.put(6, "6")
         t.put(0, "0")
         assertEquals("[3, 4, 5, 6, 7]", t.range(3, 7).collect(Collectors.toList()).toString())
-        // findet einen Knoten (11), der kein Blatt ist
+        // find the node (11), which is no leaf
         assertEquals("[11]", t.range(9, 12).collect(Collectors.toList()).toString())
-        // alle Schlüssel größer als Suchbereich
+        // find keys larger than the search area
         assertEquals("[]", t.range(-5, -1).collect(Collectors.toList()).toString())
-        // alle Schlüssel kleiner als Suchbereich
+        // find keys smaller than the search area
         assertEquals("[]", t.range(14, 17).collect(Collectors.toList()).toString())
-        /* test mit String als Schlüssel */
+        // test with string keys
         val t2 = getImplementation<String, String>()
         t2.put("a", "a")
         t2.put("aa", "aa")
@@ -384,77 +382,5 @@ abstract class BinarySearchTreeTest {
         t2.put("y", "y")
         t2.put("aaba", "aaba")
         assertEquals("[aa, aaba, ab, b]", t2.range("aa", "c").collect(Collectors.toList()).toString())
-    }
-
-    /**
-     * return a list containing the nodes of this binary tree in in-order,
-     * e.g., a [LinkedList].
-     *
-     * @return list containing tree elements in in-order, empty list if tree is empty.
-     */
-    fun inorder(tree: BinaryTree<*, *>): List<BinaryTree.Node<*, *>> {
-        val l = LinkedList<BinaryTree.Node<*, *>>()
-        inorderTraversal(l, tree.root)
-        return l
-    }
-
-    protected fun inorderTraversal(l: MutableList<BinaryTree.Node<*, *>>, v: BinaryTree.Node<*, *>?) {
-        if (v != null) {
-            inorderTraversal(l, v.leftChild)
-            l.add(v)
-            inorderTraversal(l, v.rightChild)
-        }
-    }
-
-    /**
-     * return a list containing the nodes of this binary tree in pre-order,
-     * e.g., a [LinkedList].
-     *
-     * @return list containing tree elements in in-order, empty list if tree is empty.
-     */
-    fun preorder(tree: BinaryTree<*, *>): List<BinaryTree.Node<*, *>> {
-        val l = LinkedList<BinaryTree.Node<*, *>>()
-        preorderTraversal(l, tree.root)
-        return l
-    }
-
-    protected fun preorderTraversal(l: MutableList<BinaryTree.Node<*, *>>, v: BinaryTree.Node<*, *>?) {
-        if (v != null) {
-            l.add(v)
-            preorderTraversal(l, v.leftChild)
-            preorderTraversal(l, v.rightChild)
-        }
-    }
-
-    fun toString(tree: BinaryTree<*, *>, doOutputHeight: Boolean): String {
-        val s = StringBuffer("")
-        for (v in inorder(tree)) {
-            if (doOutputHeight) {
-                s.append(toStringWithHeight(v) + " ")
-            } else {
-                s.append(toString(v) + " ")
-            }
-        }
-        return s.toString().trim { it <= ' ' }
-    }
-
-    fun toStringPre(tree: BinaryTree<*, *>, doOutputHeight: Boolean): String {
-        val s = StringBuffer("")
-        for (v in preorder(tree)) {
-            if (doOutputHeight) {
-                s.append(toStringWithHeight(v) + " ")
-            } else {
-                s.append(toString(v) + " ")
-            }
-        }
-        return s.toString().trim { it <= ' ' }
-    }
-
-    fun toStringWithHeight(node: BinaryTree.Node<*, *>): String {
-        return "(" + node.key.toString() + "," + node.value.toString() + "," + node.height + ")"
-    }
-
-    fun toString(node: BinaryTree.Node<*, *>?): String {
-        return "(" + node!!.key.toString() + "," + node.value.toString() + ")"
     }
 }
