@@ -56,7 +56,7 @@ class MoveToFrontList<K : Comparable<K>, V> : SearchableSet<K, V> {
         }
     }
 
-    fun findNode(key: K): Pair<Node<K, V>?, Node<K, V>?> {
+    private fun findNode(key: K): Pair<Node<K, V>?, Node<K, V>?> {
         var prev: Node<K, V>? = null
         var next: Node<K, V>? = head
         while (next != null) {
@@ -70,7 +70,7 @@ class MoveToFrontList<K : Comparable<K>, V> : SearchableSet<K, V> {
         return Pair(null, null)
     }
 
-    fun moveToFront(prev: Node<K, V>?, found: Node<K, V>) {
+    private fun moveToFront(prev: Node<K, V>?, found: Node<K, V>) {
         if (prev != null) {
             prev.next = found.next
             found.next?.prev = prev
