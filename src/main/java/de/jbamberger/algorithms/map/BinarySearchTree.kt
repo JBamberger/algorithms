@@ -210,7 +210,7 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
     class NodeImpl<K : Comparable<K>, V> : BinaryTree.Node<K, V> {
         override var key: K
             internal set
-        override var value: V? = null
+        override var value: V
             internal set
         override var height: Int = 0
             internal set
@@ -221,14 +221,14 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
         override var rightChild: NodeImpl<K, V>? = null
             internal set
 
-        constructor(key: K, value: V?) {
+        constructor(key: K, value: V) {
             this.key = key
             this.value = value
         }
 
         constructor(
                 key: K,
-                value: V?,
+                value: V,
                 parent: NodeImpl<K, V>?,
                 leftChild: NodeImpl<K, V>?,
                 rightChild: NodeImpl<K, V>?
