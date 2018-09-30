@@ -12,8 +12,8 @@ package de.jbamberger.algorithms.align
  * traversed and the matching sequences are reconstructed.
  *
  */
-class SequenceAlignerImpl : SequenceAligner {
-    override fun align(a: String, b: String, d: (Char, Char) -> Int): SequenceAligner.SequenceAlignment {
+class StringSequenceAlignerImpl : StringSequenceAligner {
+    override fun align(a: String, b: String, d: (Char, Char) -> Int): StringSequenceAligner.Alignment {
 
         val left = 1
         val above = 2
@@ -73,7 +73,7 @@ class SequenceAlignerImpl : SequenceAligner {
             }
         }
 
-        return SequenceAligner.SequenceAlignment(
+        return StringSequenceAligner.Alignment(
                 aBuilder.toString().reversed(),
                 bBuilder.toString().reversed(),
                 dist[n][m])

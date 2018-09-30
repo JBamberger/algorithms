@@ -10,16 +10,16 @@ import org.junit.runners.Parameterized
  */
 
 
-
 @RunWith(Parameterized::class)
-class SequenceAlignerKtTest constructor(private val algo: SequenceAligner) {
+class StringSequenceAlignerKtTest constructor(private val algo: StringSequenceAligner) {
 
     companion object {
         @JvmStatic
         @Parameterized.Parameters
-        fun params(): List<SequenceAligner> {
+        fun params(): List<StringSequenceAligner> {
             return listOf(
-                    SequenceAlignerImpl()
+                    StringSequenceAlignerImpl(),
+                    StringSequenceAlignerImplv2()
             )
         }
     }
@@ -44,7 +44,7 @@ class SequenceAlignerKtTest constructor(private val algo: SequenceAligner) {
         assertThat(alignment.distance).isEqualTo(2) // one mismatch, one substitution
         assertThat(alignment.len).isEqualTo(5)
 
-        val alignmentReverse = algo.align(s2,s1, Distances::editDistance)
+        val alignmentReverse = algo.align(s2, s1, Distances::editDistance)
         assertThat(alignment.seq1).isEqualTo(alignmentReverse.seq2)
         assertThat(alignment.seq2).isEqualTo(alignmentReverse.seq1)
         assertThat(alignment.distance).isEqualTo(alignmentReverse.distance)
