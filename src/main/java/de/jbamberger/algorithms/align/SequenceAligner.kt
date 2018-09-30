@@ -19,7 +19,7 @@ interface SequenceAligner {
 
         init {
             if (seq1.length != seq2.length) {
-                throw IllegalArgumentException("sequence lengthes must be equal. Sequences where\nseq1: $seq1\nseq2: $seq2")
+                throw IllegalArgumentException("sequence lengths must be equal. Sequences where\nseq1: $seq1\nseq2: $seq2")
             }
             len = seq1.length
         }
