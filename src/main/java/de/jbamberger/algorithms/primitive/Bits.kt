@@ -2,14 +2,16 @@ package de.jbamberger.algorithms.primitive
 
 import kotlin.experimental.and
 import kotlin.experimental.inv
-import kotlin.experimental.or
+import kotlin.experimental.xor
 
-class Bits(val length: Int, private val patternSize: Int) {
+class Bits(private val length: Int, private val patternSize: Int) {
 
     private val mask: Int
     private val patternsPerByte: Int
     private val dataLength: Int
     private val data: ByteArray
+
+    private val masks: ByteArray
 
     init {
         if (length < 0) {
@@ -34,28 +36,47 @@ class Bits(val length: Int, private val patternSize: Int) {
 
         dataLength = Math.ceil(length.toDouble() / patternsPerByte.toDouble()).toInt()
         data = ByteArray(dataLength)
+
+
+        masks = ByteArray(patternsPerByte) {
+            (mask shl (it * patternSize)).toByte()
+        }
+
     }
 
 
     operator fun set(pos: Int, value: Byte) {
-        val div = pos / patternsPerByte
-        val shiftedMask = (mask shl ((pos % patternsPerByte)) * patternSize).toByte()
-        val clearpos = (data[div] and shiftedMask.inv())
-        val newdat = (value and shiftedMask)
+        // value range check
+        if (value.toInt() and mask.inv() != 0) throw IllegalArgumentException("Value $value out of range.")
+        // position range check
+        if (pos < 0 || length <= pos) throw IllegalArgumentException("Index $pos out of range. [0, $length)")
 
-        data[div] = clearpos or newdat
+        val div = pos / patternsPerByte
+        val mod = pos % patternsPerByte
+
+        val remainingData = data[div] and (masks[mod].inv())
+        //val posData = data[div] and masks[mod]
+
+        val shifted = ((value.toInt() and mask) shl (mod * patternSize)).toByte()
+        val combined = remainingData xor shifted
+
+        data[div] = combined
     }
 
     operator fun get(pos: Int): Byte {
+        if (pos < 0 || length <= pos) throw IllegalArgumentException("Index $pos out of range. [0, $length)")
+        // the byte containing the pattern
         val div = pos / patternsPerByte
+        // the position within the byte
         val mod = pos % patternsPerByte
-        val shiftedMask = (mask shl mod).toByte()
-        val unshiftedData = data[div] and shiftedMask
-        val unshiftedInt = (unshiftedData.toInt() and 0xff)
-        val shifted = (unshiftedInt shr mod)
 
-        // Since we work with unsigned values, but Kotlin converts bytes to singned integers, the value must be
-        // masked, such that we shift in 0 instead of 1s, if the position is close to the border.
-        return shifted.toByte()
+        // extended to int, such that we can shift
+        val maskedData = (data[div] and masks[mod]).toInt()
+
+        val result = maskedData ushr (mod * patternSize)
+
+        return (result and mask).toByte()
     }
+
+    fun getBackingData(): ByteArray = data
 }

@@ -1,6 +1,5 @@
 package de.jbamberger.algorithms.primitive
 
-import de.jbamberger.algorithms.primitive.Bits
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Test
 
@@ -21,139 +20,86 @@ class BitsKtTest {
 
     }
 
+    fun test_size_1(bits: Bits, bitPos: Int, bytePos: Int, pattern: Byte) {
+        bits[bitPos] = 1
+        assertThat(bits.getBackingData()[bytePos]).isEqualTo(pattern)
+        bits[bitPos] = 0
+        assertThat(bits.getBackingData()[bytePos]).isEqualTo(0b0000_0000)
+    }
+
+    fun test_size_2(bits: Bits, bitPos: Int, bytePos: Int, p1:Byte, p2:Byte, p3:Byte) {
+        bits[bitPos] = 1
+        assertThat(bits.getBackingData()[bytePos]).isEqualTo(p1)
+        bits[bitPos] = 2
+        assertThat(bits.getBackingData()[bytePos]).isEqualTo(p2)
+        bits[bitPos] = 3
+        assertThat(bits.getBackingData()[bytePos]).isEqualTo(p3)
+        bits[bitPos] = 0
+        assertThat(bits.getBackingData()[bytePos]).isEqualTo(0b0000_0000)
+    }
+
+    fun test_size_4(bits: Bits, bitPos: Int, bytePos: Int) {
+
+        for (i in 0 until 16) {
+            bits[bitPos] = i.toByte()
+            assertThat(bits.getBackingData()[bytePos]).isEqualTo((i shl ((bitPos - bytePos * 2) * 4)).toByte())
+        }
+
+        bits[bitPos] = 0
+        assertThat(bits.getBackingData()[bytePos]).isEqualTo(0b0000_0000)
+    }
+
     @Test
     fun size1() {
         val bits = Bits(16, 1)
 
-        assertThat(bits[0]).isEqualTo(0)
-        bits[0] = 1
-        assertThat(bits[0]).isEqualTo(1)
-        assertThat(bits[1]).isEqualTo(0)
-        bits[1] = 1
-        assertThat(bits[1]).isEqualTo(1)
-        assertThat(bits[2]).isEqualTo(0)
-        bits[2] = 1
-        assertThat(bits[2]).isEqualTo(1)
-        assertThat(bits[3]).isEqualTo(0)
-        bits[3] = 1
-        assertThat(bits[3]).isEqualTo(1)
-        assertThat(bits[4]).isEqualTo(0)
-        bits[4] = 1
-        assertThat(bits[4]).isEqualTo(1)
-        assertThat(bits[5]).isEqualTo(0)
-        bits[5] = 1
-        assertThat(bits[5]).isEqualTo(1)
-        assertThat(bits[6]).isEqualTo(0)
-        bits[6] = 1
-        assertThat(bits[6]).isEqualTo(1)
-        assertThat(bits[7]).isEqualTo(0)
-        bits[7] = 1
-        assertThat(bits[7]).isEqualTo(1)
-        assertThat(bits[8]).isEqualTo(0)
-        bits[8] = 1
-        assertThat(bits[8]).isEqualTo(1)
-        assertThat(bits[9]).isEqualTo(0)
-        bits[9] = 1
-        assertThat(bits[9]).isEqualTo(1)
-        assertThat(bits[10]).isEqualTo(0)
-        bits[10] = 1
-        assertThat(bits[10]).isEqualTo(1)
-        assertThat(bits[11]).isEqualTo(0)
-        bits[11] = 1
-        assertThat(bits[11]).isEqualTo(1)
-        assertThat(bits[12]).isEqualTo(0)
-        bits[12] = 1
-        assertThat(bits[12]).isEqualTo(1)
-        assertThat(bits[13]).isEqualTo(0)
-        bits[13] = 1
-        assertThat(bits[13]).isEqualTo(1)
-        assertThat(bits[14]).isEqualTo(0)
-        bits[14] = 1
-        assertThat(bits[14]).isEqualTo(1)
-        assertThat(bits[15]).isEqualTo(0)
-        bits[15] = 1
-        assertThat(bits[15]).isEqualTo(1)
+        assertThat(bits.getBackingData()[0]).isEqualTo(0b0000_0000)
+        assertThat(bits.getBackingData().size).isEqualTo(2)
+        test_size_1(bits, 0x0, 0, 0b0000_0001.toByte())
+        test_size_1(bits, 0x1, 0, 0b0000_0010.toByte())
+        test_size_1(bits, 0x2, 0, 0b0000_0100.toByte())
+        test_size_1(bits, 0x3, 0, 0b0000_1000.toByte())
+        test_size_1(bits, 0x4, 0, 0b0001_0000.toByte())
+        test_size_1(bits, 0x5, 0, 0b0010_0000.toByte())
+        test_size_1(bits, 0x6, 0, 0b0100_0000.toByte())
+        test_size_1(bits, 0x7, 0, 0b1000_0000.toByte())
+
+        test_size_1(bits, 0x8, 1, 0b0000_0001.toByte())
+        test_size_1(bits, 0x9, 1, 0b0000_0010.toByte())
+        test_size_1(bits, 0xa, 1, 0b0000_0100.toByte())
+        test_size_1(bits, 0xb, 1, 0b0000_1000.toByte())
+        test_size_1(bits, 0xc, 1, 0b0001_0000.toByte())
+        test_size_1(bits, 0xd, 1, 0b0010_0000.toByte())
+        test_size_1(bits, 0xe, 1, 0b0100_0000.toByte())
+        test_size_1(bits, 0xf, 1, 0b1000_0000.toByte())
     }
 
     @Test
     fun size2() {
         val bits = Bits(8, 2)
 
-        assertThat(bits[0]).isEqualTo(0)
-        bits[0] = 1
-        assertThat(bits[0]).isEqualTo(1)
-        assertThat(bits[1]).isEqualTo(0)
-        bits[1] = 1
-        assertThat(bits[1]).isEqualTo(1)
-        assertThat(bits[2]).isEqualTo(0)
-        bits[2] = 1
-        assertThat(bits[2]).isEqualTo(1)
-        assertThat(bits[3]).isEqualTo(0)
-        bits[3] = 1
-        assertThat(bits[3]).isEqualTo(1)
-        assertThat(bits[4]).isEqualTo(0)
-        bits[4] = 1
-        assertThat(bits[4]).isEqualTo(1)
-        assertThat(bits[5]).isEqualTo(0)
-        bits[5] = 1
-        assertThat(bits[5]).isEqualTo(1)
-        assertThat(bits[6]).isEqualTo(0)
-        bits[6] = 1
-        assertThat(bits[6]).isEqualTo(1)
-        assertThat(bits[7]).isEqualTo(0)
-        bits[7] = 1
-        assertThat(bits[7]).isEqualTo(1)
+        assertThat(bits.getBackingData()[0]).isEqualTo(0b0000_0000)
+        assertThat(bits.getBackingData().size).isEqualTo(2)
+        test_size_2(bits, 0x0, 0, 0b0000_0001.toByte(), 0b0000_0010.toByte(), 0b0000_0011.toByte())
+        test_size_2(bits, 0x1, 0, 0b0000_0100.toByte(), 0b0000_1000.toByte(), 0b0000_1100.toByte())
+        test_size_2(bits, 0x2, 0, 0b0001_0000.toByte(), 0b0010_0000.toByte(), 0b0011_0000.toByte())
+        test_size_2(bits, 0x3, 0, 0b0100_0000.toByte(), 0b1000_0000.toByte(), 0b1100_0000.toByte())
+        test_size_2(bits, 0x4, 1, 0b0000_0001.toByte(), 0b0000_0010.toByte(), 0b0000_0011.toByte())
+        test_size_2(bits, 0x5, 1, 0b0000_0100.toByte(), 0b0000_1000.toByte(), 0b0000_1100.toByte())
+        test_size_2(bits, 0x6, 1, 0b0001_0000.toByte(), 0b0010_0000.toByte(), 0b0011_0000.toByte())
+        test_size_2(bits, 0x7, 1, 0b0100_0000.toByte(), 0b1000_0000.toByte(), 0b1100_0000.toByte())
+    }
 
-        bits[0] = 2
-        assertThat(bits[0]).isEqualTo(2)
-        bits[1] = 2
-        assertThat(bits[1]).isEqualTo(2)
-        bits[2] = 2
-        assertThat(bits[2]).isEqualTo(2)
-        bits[3] = 2
-        assertThat(bits[3]).isEqualTo(2)
-        bits[4] = 2
-        assertThat(bits[4]).isEqualTo(2)
-        bits[5] = 2
-        assertThat(bits[5]).isEqualTo(2)
-        bits[6] = 2
-        assertThat(bits[6]).isEqualTo(2)
-        bits[7] = 2
-        assertThat(bits[7]).isEqualTo(2)
+    @Test
+    fun size4() {
+        val bits = Bits(4, 4)
 
-        bits[0] = 3
-        assertThat(bits[0]).isEqualTo(3)
-        bits[1] = 3
-        assertThat(bits[1]).isEqualTo(3)
-        bits[2] = 3
-        assertThat(bits[2]).isEqualTo(3)
-        bits[3] = 3
-        assertThat(bits[3]).isEqualTo(3)
-        bits[4] = 3
-        assertThat(bits[4]).isEqualTo(3)
-        bits[5] = 3
-        assertThat(bits[5]).isEqualTo(3)
-        bits[6] = 3
-        assertThat(bits[6]).isEqualTo(3)
-        bits[7] = 3
-        assertThat(bits[7]).isEqualTo(3)
-
-        bits[0] = 0
-        assertThat(bits[0]).isEqualTo(0)
-        bits[1] = 0
-        assertThat(bits[1]).isEqualTo(0)
-        bits[2] = 0
-        assertThat(bits[2]).isEqualTo(0)
-        bits[3] = 0
-        assertThat(bits[3]).isEqualTo(0)
-        bits[4] = 0
-        assertThat(bits[4]).isEqualTo(0)
-        bits[5] = 0
-        assertThat(bits[5]).isEqualTo(0)
-        bits[6] = 0
-        assertThat(bits[6]).isEqualTo(0)
-        bits[7] = 0
-        assertThat(bits[7]).isEqualTo(0)
+        assertThat(bits.getBackingData()[0]).isEqualTo(0b0000_0000)
+        assertThat(bits.getBackingData().size).isEqualTo(2)
+        test_size_4(bits, 0x0, 0)
+        test_size_4(bits, 0x1, 0)
+        test_size_4(bits, 0x2, 1)
+        test_size_4(bits, 0x3, 1)
     }
 
 }

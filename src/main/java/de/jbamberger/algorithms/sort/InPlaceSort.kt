@@ -9,6 +9,10 @@ import kotlin.math.floor
 import kotlin.math.log
 
 /**
+ * InPlace refers to the fact, that these functions take an array as parameter and then write the sorted result into
+ * this array. The sorting algorithm might use additional memory while executing.
+ *
+ *
  * @author Jannik Bamberger (dev.jbamberger@gmail.com)
  */
 
