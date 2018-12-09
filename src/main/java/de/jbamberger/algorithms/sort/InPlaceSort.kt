@@ -142,10 +142,7 @@ fun radixExchangeSort(M: IntArray) {
  * Split the array in the middle. Sort both parts recursively. After the recursion, sorted parts are merged.
  */
 fun <T> mergeSort(input: Array<T>, compare: Comparator<T>) {
-    operator fun T.compareTo(i: T): Int {
-        return compare.compare(this, i)
-    }
-
+    operator fun T.compareTo(i: T) = compare.compare(this, i)
     val tmp = input.copyOf()
 
     fun localMergeSort(l: Int, r: Int) {
@@ -195,6 +192,8 @@ fun <T> randomizedQuickSort(input: Array<T>, compare: Comparator<T>) {
  * for both sides.
  */
 fun <T> quickSort(input: Array<T>, compare: Comparator<T>) {
+    operator fun T.compareTo(i: T) = compare.compare(this, i)
+
     fun localQuickSort(l: Int, r: Int) {
         if (l >= r) return
 
@@ -203,8 +202,8 @@ fun <T> quickSort(input: Array<T>, compare: Comparator<T>) {
         val p = input[l]
 
         while (i <= j) {
-            while (i <= j && (compare.compare(input[i], p) < 0)) i++
-            while (i <= j && (compare.compare(input[j], p) >= 0)) j--
+            while (i <= j && input[i] < p) i++
+            while (i <= j && input[j] >= p) j--
             if (i < j) input.swap(i, j)
         }
         if (l < j) {
@@ -229,9 +228,7 @@ fun <T> quickSort(input: Array<T>, compare: Comparator<T>) {
  * repeat until all elements are sorted.
  */
 fun <T> heapSort(input: Array<T>, compare: Comparator<T>) {
-    operator fun T.compareTo(i: T): Int {
-        return compare.compare(this, i)
-    }
+    operator fun T.compareTo(i: T) = compare.compare(this, i)
 
     fun heapify(x: Int, r: Int) {
         var i = x
@@ -271,9 +268,7 @@ fun <T> heapSort(input: Array<T>, compare: Comparator<T>) {
  * For each position, search through the remaining positions and select the appropriate item that comes next.
  */
 fun <T> selectionSort(input: Array<T>, compare: Comparator<T>) {
-    operator fun T.compareTo(i: T): Int {
-        return compare.compare(this, i)
-    }
+    operator fun T.compareTo(i: T) = compare.compare(this, i)
 
     val n = input.size
     for (i in 0..n - 2) {
@@ -284,9 +279,7 @@ fun <T> selectionSort(input: Array<T>, compare: Comparator<T>) {
 }
 
 fun <T> insertionSort(elements: Array<T>, compare: Comparator<T>) {
-    operator fun T.compareTo(i: T): Int {
-        return compare.compare(this, i)
-    }
+    operator fun T.compareTo(i: T) = compare.compare(this, i)
 
     for (i in 1 until elements.size) {
         val tmp = elements[i]
