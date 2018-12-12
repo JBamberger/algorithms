@@ -4,7 +4,7 @@ package de.jbamberger.algorithms.align
  * This implementation has no distance matrix. The next optimal step is computed dynamically when the sequences are
  * reconstructed.
  */
-class SequenceAlignerImplv3<T> : ArraySequenceAligner<T> {
+class SequenceAlignerImplv2<T> : ArraySequenceAligner<T> {
     override fun align(a: Array<T>, b: Array<T>, d: (T, T) -> Int, empty: T): Alignment<T> {
         val n = a.size
         val m = b.size
