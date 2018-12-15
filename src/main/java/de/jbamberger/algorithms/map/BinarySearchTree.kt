@@ -1,15 +1,38 @@
 package de.jbamberger.algorithms.map
 
-import java.util.stream.Stream
 
-
-open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
+open class BinarySearchTree<K : Comparable<K>, V> : SimpleSortedMutableMap<K, V> {
 
     override var size: Int = 0
         internal set
 
-    override var root: NodeImpl<K, V>? = null
+    var root: NodeImpl<K, V>? = null
         internal set
+
+    override fun containsKey(key: K): Boolean = get(key) != null
+
+    override fun entryRange(from: K, to: K): Iterable<Entry<K, V>> {
+        if (from < to) {
+            throw IllegalArgumentException("Minimum is not less or equal than maximum")
+        }
+        val nodeList = ArrayList<Entry<K, V>>(size)
+
+        fun range(node: NodeImpl<K, V>?, min: K, max: K) {
+            when {
+                node == null -> return
+                node.key > max -> range(node.leftChild, min, max)
+                node.key < min -> range(node.rightChild, min, max)
+                else -> {
+                    range(node.leftChild, min, max)
+                    nodeList.add(node)
+                    range(node.rightChild, min, max)
+                }
+            }
+        }
+
+        range(root, to, from)
+        return nodeList
+    }
 
     /**
      * Search for a key in the subtree below [root].
@@ -147,40 +170,19 @@ open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
         }
     }
 
-    override fun range(min: K, max: K): Stream<V> {
-        if (max < min) throw IllegalArgumentException("Minimum is not less or equal than maximum")
 
-        val b = Stream.builder<V>()
-        findRange(b, root, min, max)
-        return b.build()
-    }
-
-    private fun findRange(list: Stream.Builder<V>, node: BinaryTree.Node<K, V>?, min: K, max: K) {
-        if (node == null) return
-
-        when {
-            node.key > max -> findRange(list, node.leftChild, min, max)
-            node.key < min -> findRange(list, node.rightChild, min, max)
-            else -> {
-                findRange(list, node.leftChild, min, max)
-                list.accept(node.value)
-                findRange(list, node.rightChild, min, max)
-            }
-        }
-    }
-
-    class NodeImpl<K : Comparable<K>, V> : BinaryTree.Node<K, V> {
+    class NodeImpl<K : Comparable<K>, V> : Entry<K, V> {
         override var key: K
             internal set
         override var value: V
             internal set
-        override var height: Int = 0
+        var height: Int = 0
             internal set
-        override var parent: NodeImpl<K, V>? = null
+        var parent: NodeImpl<K, V>? = null
             internal set
-        override var leftChild: NodeImpl<K, V>? = null
+        var leftChild: NodeImpl<K, V>? = null
             internal set
-        override var rightChild: NodeImpl<K, V>? = null
+        var rightChild: NodeImpl<K, V>? = null
             internal set
 
         constructor(key: K, value: V) {
