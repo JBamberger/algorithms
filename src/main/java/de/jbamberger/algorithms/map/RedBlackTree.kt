@@ -124,16 +124,77 @@ class RedBlackTree<K : Comparable<K>, V>() : SimpleSortedMutableMap<K, V> {
         colorRoot.right!!.color = Color.RED
     }
 
-    override fun remove(key: K): V? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun findRightmostInLeftSub(leftSubTreeRoot: Node<K, V>): Node<K, V> {
+        var v = leftSubTreeRoot
+        while (v.right != null) v = v.right!!
+        return v
     }
 
+    override fun remove(key: K): V? {
+        /**
+         * Delete a node with at most one child on the left side
+         */
+        fun deleteSimpleLeft(u:Node<K,V>, v: Node<K, V>) {
+            val w = v.left
+            // if v is the direct child of u it is the left instead of the right child
+            if (v == u.left) {
+                u.makeLeftChild(w)
+            } else {
+                u.makeRightChild(w)
+            }
+        }
+        /**
+         * Delete a node with at most one child on the right side
+         */
+        fun deleteSimpleRight(key: K, v: Node<K, V>) {
+            val w = v.right // the only child of v
+            if (v == root) {
+                root = w
+                w?.parent = null
+            } else {
+                // the parent must not be null, because v is not the root node
+                val u = v.parent!!
+                // check if the node to delete is a left or right child, then move the subtree up
+                if (key < u.key) {
+                    u.makeLeftChild(w)
+                } else {
+                    u.makeRightChild(w)
+                }
+            }
+        }
+
+
+
+
+        // find the node containing the key. If the node is not present, nothing is to do
+        var v = getInternal(key) ?: return null
+        val a = v.value
+        val leftChild = v.left
+        if (leftChild != null) { // the node has a left subtree
+            val u = v // u is the upper node
+            // v is now the rightmost node in the left subtree
+            v = findRightmostInLeftSub(leftChild)
+
+            // set the values in the upper node (i.e. the lower node is pulled up)
+            u.key = v.key
+            u.value = v.value
+
+            // now we can delete the lower node
+            // the node v has at most one child at the left side
+            deleteSimpleLeft(u, v)
+        } else { // there is no left subtree, therefore the
+            // node can be removed and the right tree can be shifted up
+            deleteSimpleRight(key, v)
+        }
+        return a
+    }
+
+
+
     private fun getInternal(key: K): Node<K, V>? {
-        var prev: Node<K, V>? = null
         var n: Node<K, V>? = root
 
         while (n != null) {
-            prev = n
             when (n.key) {
                 key == n.key -> return n
                 key < n.key -> n = n.left
@@ -143,20 +204,6 @@ class RedBlackTree<K : Comparable<K>, V>() : SimpleSortedMutableMap<K, V> {
         return null
     }
 
-    private fun getPredInternal(key: K): Node<K, V>? {
-        var prev: Node<K, V>? = null
-        var n: Node<K, V>? = root
-
-        while (n != null) {
-            when (n.key) {
-                key == n.key -> return prev
-                key < n.key -> n = n.left
-                key > n.key -> n = n.right
-            }
-            prev = n
-        }
-        return prev
-    }
 
     private fun rotateLeft(u: Node<K, V>, v: Node<K, V>): Node<K, V> {
         if (u == root) {
@@ -200,7 +247,7 @@ class RedBlackTree<K : Comparable<K>, V>() : SimpleSortedMutableMap<K, V> {
     }
 
     class Node<K, V>(
-            override val key: K,
+            override var key: K,
             override var value: V,
             var color: Color
     ) : Entry<K, V> {
