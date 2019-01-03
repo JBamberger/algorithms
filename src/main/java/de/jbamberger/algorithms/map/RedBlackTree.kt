@@ -3,7 +3,7 @@ package de.jbamberger.algorithms.map
 
 /**
  * A Red-Black Tree is a mostly balanced binary search tree. To maintain a mostly balanced tree
- * some nodes are marked as exceptions to constraints that apply to a fully balanced tree.
+ * some nodes are marked as exceptions to constraints that d to a fully balanced tree.
  * In this case, the normal nodes are marked as 'black' and the exceptional nodes are 'red'.
  * The exceptional nodes are distributed, such that each leaf node has the exactly same depth,
  * if the exceptional nodes are not counted.
@@ -132,10 +132,18 @@ class RedBlackTree<K : Comparable<K>, V>() : SimpleSortedMutableMap<K, V> {
 
     override fun remove(key: K): V? {
         /**
-         * Delete a node with at most one child on the left side
+         * Delete a node with at most one child on the left side. v should be deleted. u is the subtree root.
          */
-        fun deleteSimpleLeft(u:Node<K,V>, v: Node<K, V>) {
+        fun deleteSimpleLeft(u: Node<K, V>, v: Node<K, V>) {
             val w = v.left
+            if (v.color == Color.BLACK) {
+                if (w != null) {
+                    w.color = Color.BLACK
+                } else {
+
+                }
+            }
+
             // if v is the direct child of u it is the left instead of the right child
             if (v == u.left) {
                 u.makeLeftChild(w)
@@ -143,15 +151,19 @@ class RedBlackTree<K : Comparable<K>, V>() : SimpleSortedMutableMap<K, V> {
                 u.makeRightChild(w)
             }
         }
+
         /**
          * Delete a node with at most one child on the right side
          */
         fun deleteSimpleRight(key: K, v: Node<K, V>) {
             val w = v.right // the only child of v
             if (v == root) {
+                w?.color = Color.BLACK
                 root = w
                 w?.parent = null
             } else {
+
+
                 // the parent must not be null, because v is not the root node
                 val u = v.parent!!
                 // check if the node to delete is a left or right child, then move the subtree up
@@ -162,8 +174,6 @@ class RedBlackTree<K : Comparable<K>, V>() : SimpleSortedMutableMap<K, V> {
                 }
             }
         }
-
-
 
 
         // find the node containing the key. If the node is not present, nothing is to do
@@ -179,7 +189,7 @@ class RedBlackTree<K : Comparable<K>, V>() : SimpleSortedMutableMap<K, V> {
             u.key = v.key
             u.value = v.value
 
-            // now we can delete the lower node
+            // now we can delete the lower node v
             // the node v has at most one child at the left side
             deleteSimpleLeft(u, v)
         } else { // there is no left subtree, therefore the
@@ -188,7 +198,6 @@ class RedBlackTree<K : Comparable<K>, V>() : SimpleSortedMutableMap<K, V> {
         }
         return a
     }
-
 
 
     private fun getInternal(key: K): Node<K, V>? {
