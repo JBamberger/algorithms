@@ -13,13 +13,16 @@ import kotlin.experimental.xor
  */
 class Bits(private val length: Int, private val patternSize: Int) {
 
+    // allowed range of values for each pattern
     private val mask: Int
-    private val patternsPerByte: Int
+
+
     private val dataLength: Int
     private val data: ByteArray
 
-    private val pShift: Int
-    private val pPat: Int
+    //
+    private val getIndexInArray: Int
+    private val getIndexInByte: Int
 
     private val masks: ByteArray
 
@@ -27,25 +30,23 @@ class Bits(private val length: Int, private val patternSize: Int) {
         if (length < 0) {
             throw IllegalArgumentException("length must be positive, actual value is $length")
         }
+        val patternsPerByte = 8 / patternSize
 
         when (patternSize) {
             1 -> {
                 mask = 0b0000_0001
-                patternsPerByte = 8
-                pShift = 3 // log2 of patternsPerByte
-                pPat = 0b0000_0111
+                getIndexInArray = 3 // log2 of patternsPerByte
+                getIndexInByte = 0b0000_0111
             }
             2 -> {
                 mask = 0b0000_0011
-                patternsPerByte = 4
-                pShift = 2
-                pPat = 0b0000_0011
+                getIndexInArray = 2
+                getIndexInByte = 0b0000_0011
             }
             4 -> {
                 mask = 0b0000_1111
-                patternsPerByte = 2
-                pShift = 1
-                pPat = 0b0000_0001
+                getIndexInArray = 1
+                getIndexInByte = 0b0000_0001
             }
             else -> mask = (throw IllegalArgumentException("patternSize must be 1,2 or 4 but is $patternSize"))
         }
@@ -56,7 +57,7 @@ class Bits(private val length: Int, private val patternSize: Int) {
         // init the backing data buffer
         data = ByteArray(dataLength)
 
-        // initialize a bit-mask for each position
+        // initialize a bit-mask for each position in the byte
         masks = ByteArray(patternsPerByte) {
             (mask shl (it * patternSize)).toByte()
         }
@@ -70,8 +71,8 @@ class Bits(private val length: Int, private val patternSize: Int) {
         // position range check
         if (pos < 0 || length <= pos) throw IllegalArgumentException("Index $pos out of range. [0, $length)")
 
-        val div = pos shr pShift
-        val mod = pos and pPat
+        val div = pos shr getIndexInArray
+        val mod = pos and getIndexInByte
 
         val remainingData = data[div] and (masks[mod].inv())
         //val posData = data[div] and masks[mod]
@@ -84,10 +85,9 @@ class Bits(private val length: Int, private val patternSize: Int) {
 
     operator fun get(pos: Int): Byte {
         if (pos < 0 || length <= pos) throw IllegalArgumentException("Index $pos out of range. [0, $length)")
-        // the byte containing the pattern
-        val div = pos shr pShift
-        // the position within the byte
-        val mod = pos and pPat
+
+        val div = pos shr getIndexInArray
+        val mod = pos and getIndexInByte
 
         // extended to int, such that we can shift
         val maskedData = (data[div] and masks[mod]).toInt()
