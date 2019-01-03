@@ -1,19 +1,19 @@
 package de.jbamberger.algorithms.map
 
 
-open class BinarySearchTree<K : Comparable<K>, V> : SimpleSortedMutableMap<K, V> {
+open class BinarySearchTree<K : Comparable<K>, V> : BinaryTree<K, V> {
 
     override var size: Int = 0
         internal set
 
-    var root: NodeImpl<K, V>? = null
+    override var root: NodeImpl<K, V>? = null
         internal set
 
     override fun containsKey(key: K): Boolean = get(key) != null
 
     override fun entryRange(from: K, to: K): Iterable<Entry<K, V>> {
-        if (from < to) {
-            throw IllegalArgumentException("Minimum is not less or equal than maximum")
+        if (from > to) {
+            throw IllegalArgumentException("Minimum is greater than the maximum")
         }
         val nodeList = ArrayList<Entry<K, V>>(size)
 
@@ -30,7 +30,7 @@ open class BinarySearchTree<K : Comparable<K>, V> : SimpleSortedMutableMap<K, V>
             }
         }
 
-        range(root, to, from)
+        range(root, from, to)
         return nodeList
     }
 
@@ -171,18 +171,18 @@ open class BinarySearchTree<K : Comparable<K>, V> : SimpleSortedMutableMap<K, V>
     }
 
 
-    class NodeImpl<K : Comparable<K>, V> : Entry<K, V> {
+    class NodeImpl<K : Comparable<K>, V> : TreeNode<K, V> {
         override var key: K
             internal set
         override var value: V
             internal set
-        var height: Int = 0
+        override var height: Int = 0
             internal set
-        var parent: NodeImpl<K, V>? = null
+        override var parent: NodeImpl<K, V>? = null
             internal set
-        var leftChild: NodeImpl<K, V>? = null
+        override var leftChild: NodeImpl<K, V>? = null
             internal set
-        var rightChild: NodeImpl<K, V>? = null
+        override var rightChild: NodeImpl<K, V>? = null
             internal set
 
         constructor(key: K, value: V) {

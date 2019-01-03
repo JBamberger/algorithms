@@ -5,7 +5,6 @@ import de.jbamberger.algorithms.map.TestHelper.toStringPre
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import java.util.stream.Collectors
 
 /**
  * Inspired by test cases provide for the lecture "Algorithmen und Datenstrukturen" held in the winter term 2016/17 at
@@ -363,13 +362,13 @@ abstract class BinarySearchTreeTest {
         t.put(2, "2")
         t.put(6, "6")
         t.put(0, "0")
-        assertEquals("[3, 4, 5, 6, 7]", t.range(3, 7).collect(Collectors.toList()).toString())
+        assertEquals("[3, 4, 5, 6, 7]", t.valueRange(3, 7).toString())
         // find the node (11), which is no leaf
-        assertEquals("[11]", t.range(9, 12).collect(Collectors.toList()).toString())
+        assertEquals("[11]", t.valueRange(9, 12).toString())
         // find keys larger than the search area
-        assertEquals("[]", t.range(-5, -1).collect(Collectors.toList()).toString())
+        assertEquals("[]", t.valueRange(-5, -1).toString())
         // find keys smaller than the search area
-        assertEquals("[]", t.range(14, 17).collect(Collectors.toList()).toString())
+        assertEquals("[]", t.valueRange(14, 17).toString())
         // test with string keys
         val t2 = getImplementation<String, String>()
         t2.put("a", "a")
@@ -381,6 +380,6 @@ abstract class BinarySearchTreeTest {
         t2.put("x", "x")
         t2.put("y", "y")
         t2.put("aaba", "aaba")
-        assertEquals("[aa, aaba, ab, b]", t2.range("aa", "c").collect(Collectors.toList()).toString())
+        assertEquals("[aa, aaba, ab, b]", t2.valueRange("aa", "c").toString())
     }
 }

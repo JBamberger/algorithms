@@ -23,6 +23,16 @@ interface SimpleMutableMap<K, V> : SimpleMap<K, V> {
 
 interface SimpleSortedMutableMap<K : Comparable<K>, V> : SimpleMutableMap<K, V>, SimpleSortedMap<K, V>
 
+interface BinaryTree<K : Comparable<K>, V> : SimpleSortedMutableMap<K, V> {
+    val root: TreeNode<K, V>?
+}
+
+interface TreeNode<K : Comparable<K>, V> : Entry<K, V> {
+    val parent: BinarySearchTree.NodeImpl<K, V>?
+    val leftChild: BinarySearchTree.NodeImpl<K, V>?
+    val rightChild: BinarySearchTree.NodeImpl<K, V>?
+    val height: Int
+}
 
 interface Entry<K, V> {
     val key: K
