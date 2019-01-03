@@ -19,8 +19,7 @@ class SequenceAlignerKtTest constructor(private val algo: ArraySequenceAligner<C
         fun params(): List<ArraySequenceAligner<Char>> {
             return listOf(
                     SequenceAlignerImplv1(),
-                    SequenceAlignerImplv2(),
-                    SequenceAlignerImplv3()
+                    SequenceAlignerImplv2()
             )
         }
     }
