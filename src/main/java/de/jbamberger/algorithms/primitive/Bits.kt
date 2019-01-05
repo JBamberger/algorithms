@@ -20,7 +20,6 @@ class Bits(private val length: Int, private val patternSize: Int) {
     private val dataLength: Int
     private val data: ByteArray
 
-    //
     private val getIndexInArray: Int
     private val getIndexInByte: Int
 
@@ -30,26 +29,22 @@ class Bits(private val length: Int, private val patternSize: Int) {
         if (length < 0) {
             throw IllegalArgumentException("length must be positive, actual value is $length")
         }
+
+
         val patternsPerByte = 8 / patternSize
 
-        when (patternSize) {
-            1 -> {
-                mask = 0b0000_0001
-                getIndexInArray = 3 // log2 of patternsPerByte
-                getIndexInByte = 0b0000_0111
-            }
-            2 -> {
-                mask = 0b0000_0011
-                getIndexInArray = 2
-                getIndexInByte = 0b0000_0011
-            }
-            4 -> {
-                mask = 0b0000_1111
-                getIndexInArray = 1
-                getIndexInByte = 0b0000_0001
-            }
-            else -> mask = (throw IllegalArgumentException("patternSize must be 1,2 or 4 but is $patternSize"))
+
+        getIndexInArray = when (patternsPerByte) {
+            8 -> 3
+            4 -> 2
+            2 -> 1
+            1 -> 0
+            else -> throw IllegalArgumentException("patternSize must be 1,2 or 4 but is $patternSize")
         }
+
+        mask = (0xff ushr (8 - patternSize)) and 0xff
+
+        getIndexInByte = (0xff xor (0xff shl getIndexInArray)) and 0xff
 
         // determine the number of bytes required to store the given number of patterns
         dataLength = Math.ceil(length.toDouble() / patternsPerByte.toDouble()).toInt()
