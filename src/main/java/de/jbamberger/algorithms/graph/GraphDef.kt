@@ -5,33 +5,33 @@ package de.jbamberger.algorithms.graph
  */
 
 
-interface Graph<NodePayload, EdgePayload> {
+interface Graph<Id, NodePayload, EdgePayload> {
     val nodeCount: Int
     val edgeCount: Int
-    val edges: Set<Edge<EdgePayload>>
-    val nodes: Set<Node<NodePayload>>
+    val edges: Set<Edge<Id, EdgePayload>>
+    val nodes: Set<Node<Id, NodePayload>>
 }
 
-interface MutableGraph<NodePayload, EdgePayload> : Graph<NodePayload, EdgePayload> {
-    fun addNode(node: Node<NodePayload>)
-    fun addEdgeNode(node: Node<NodePayload>, parent: Node<NodePayload>)
-    fun addEdge(edge: Edge<EdgePayload>)
-    fun removeEdge(edge: Edge<EdgePayload>)
-    fun removeEdgeAndOrphans(edge: Edge<EdgePayload>)
-    fun removeNode(node: Node<NodePayload>)
+interface MutableGraph<Id, NodePayload, EdgePayload> : Graph<Id, NodePayload, EdgePayload> {
+    fun addNode(node: Node<Id, NodePayload>)
+    fun addEdgeNode(node: Node<Id, NodePayload>, parent: Node<Id, NodePayload>)
+    fun addEdge(edge: Edge<Id, EdgePayload>)
+    fun removeEdge(edge: Edge<Id, EdgePayload>)
+    fun removeEdgeAndOrphans(edge: Edge<Id, EdgePayload>)
+    fun removeNode(node: Node<Id, NodePayload>)
 }
 
-interface DirectedGraph<NodePayload, EdgePayload> : Graph<NodePayload, EdgePayload>
-interface UndirectedGraph<NodePayload, EdgePayload> : Graph<NodePayload, EdgePayload>
+interface DirectedGraph<Id, NodePayload, EdgePayload> : Graph<Id, NodePayload, EdgePayload>
+interface UndirectedGraph<Id, NodePayload, EdgePayload> : Graph<Id, NodePayload, EdgePayload>
 
-interface Node<Payload> {
-    val id: Int
+interface Node<Id, Payload> {
+    val id: Id
     val payload: Payload
 }
 
-interface Edge<Payload> {
-    val from: Int
-    val to: Int
+interface Edge<Id, Payload> {
+    val from: Id
+    val to: Id
     val payload: Payload
 }
 
