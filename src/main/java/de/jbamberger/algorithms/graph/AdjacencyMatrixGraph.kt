@@ -1,6 +1,7 @@
 package de.jbamberger.algorithms.graph
 
 import java.util.*
+import kotlin.collections.HashMap
 
 class CodeGraphTransform(
         private val initialNodeId: NodeId,
@@ -14,7 +15,7 @@ class CodeGraphTransform(
         }
     } ?: throw IllegalArgumentException("No node 0.")
 
-    private val initialEdge: Pair<NodeId, NodeId> = graph.getNeighbors(initialNodeId).let {
+    private val initialEdge: Pair<NodeId, NodeId> = graph.getSuccessors(initialNodeId).let {
         return@let when {
             it.size != 1 -> throw IllegalArgumentException("Initial node must have exactly one outgoing edge.")
             else -> Pair(initialNodeId, it.first())
@@ -61,86 +62,102 @@ class CodeGraphTransform(
             mergeAdjacentComputationalNodes()
             replaceControlFlowBranches()
             replaceControlFlowLoops()
+            dropUselessMergeNodes()
+
+
+
+            //TODO: remove
+            println("##########################################")
+            println(graph.toString())
+            println("##########################################")
         } while (oldGraphSize > graph.nodes().size)
     }
 
     private fun mergeAdjacentComputationalNodes() {
         val nodes = graph.filterNodes { it.type == NodeType.COMPUTATION }
+        for (node in nodes.entries) {
+            val (next, nextVal) = requireNext(node.key)
+            if (nextVal.type == NodeType.COMPUTATION) {
+                // set the values on next, because next might appear later in the list
+                nextVal.statements = node.value.statements + "\n" + nextVal.statements
+                graph.remove(node.key)
+            }
+        }
+    }
 
+    private fun dropUselessMergeNodes() {
+        val mergeNodes = graph.filterNodes { it.type == NodeType.MERGE }
 
+        for (node in mergeNodes) {
+            val predecessors = graph.getPredecessors(node.key)
+            if (predecessors.size == 1) {
+                val prevId = predecessors.first()
+                val next = requireNext(node.key)
 
-        TODO()
+                graph[prevId, next.first] = ""
+                graph.remove(node.key)
+            }
+        }
     }
 
     private fun replaceControlFlowBranches() {
         val decisionNodes = graph.filterNodes { it.type == NodeType.DECISION }
 
-        for (entry in decisionNodes.entries) {
-            val (a, b) = entry.requireTwoOutgoing();
+        for (d in decisionNodes.entries) {
+            val (a, b) = d.requireTwoOutgoing();
 
             if (a == b) {
                 throw IllegalStateException("Parallel connections are not allowed.")
             }
-
             val aVal = graph[a]!!
             val bVal = graph[b]!!
 
-
             if (aVal.type == NodeType.COMPUTATION) {
+                // a is the IF branch
                 val (next, nextVal) = requireNext(a)
 
-
-                if (nextVal.type == NodeType.MERGE) {
-                    // this branch is complete, we need to check, if the other branch is complete too
-                    if (next == b) {
-                        // there exists no else branch
-
-                        replaceIf(entry.key, a, b)
-                    } else if (bVal.type == NodeType.COMPUTATION) {// good sign, we can continue
-                        val (bNext, bNextVal) = requireNext(b)
-
-                        if (bNext == next) {
-                            // the branches end at the same position, we can replace the entire thing with a
-                            // computational node
-
-                            replaceIfElse(entry.key, a, b, next)
-                        } else {
-                            // this branch contains more than we anticipated
-                        }
-
-
-                    } else {
-                        // probably a conditional node which must be processed before we can simplify this conditional
-                        // -> skip to next node
-                    }
-                } else {
-                    // skip, we cannot do anything here.
+                if (nextVal.type != NodeType.MERGE) {
+                    continue // this path contains more nodes that need to shrink into one.
                 }
+
+                // this branch is complete, we need to check, if the other branch is complete too
+                if (next == b) {
+                    replaceIf(d.key, a, b) // b ist the same merge node as the next after a, i.e. there is no else
+                    continue
+                }
+                if (bVal.type != NodeType.COMPUTATION) {
+                    continue // the branch contains no computation but exists -> more processing necessary
+                }
+
+                // b is a computation node
+                val (bNext, bNextVal) = requireNext(b)
+
+                if (bNext != next) {
+                    continue // the else path is too complex and needs further processing
+                }
+                replaceIfElse(d.key, a, b, next)
+                continue
             } else if (aVal.type == NodeType.MERGE) {
-                if (bVal.type == NodeType.COMPUTATION) {
-                    val (next, nextVal) = requireNext(b)
-
-                    if (next == a) {
-                        // both paths end in the same place
-                        // no else clause is available
-
-                        replaceIf(entry.key, b, a)
-                    } else {
-                        // more processing required
-                        // skip to next node
-                    }
-                } else {
-                    // skip, there is more processing necessary
+                // a is the non-existing else branch
+                if (bVal.type != NodeType.COMPUTATION) {
+                    continue // b is complex -> more processing necessary
                 }
+                val (next, nextVal) = requireNext(b)
+
+                if (next != a) {
+                    continue // the branch is complex -> more processing necessary
+                }
+
+                replaceIf(d.key, b, a)
+                continue
+            } else {
+                continue // not a clear if
             }
-
-
         }
-        TODO()
     }
 
     private fun replaceControlFlowLoops() {
-        TODO()
+        //TODO()
     }
 
     /**
@@ -159,7 +176,7 @@ class CodeGraphTransform(
      * assert that the graph is connected
      */
     private fun assertGraphStylePreTraversal() {
-        TODO()
+        //TODO()
     }
 
     /**
@@ -181,7 +198,7 @@ class CodeGraphTransform(
             val node = edge.second
             if (node !in visited) {
                 visited[node] = fdsNumber++
-                graph.getNeighbors(node).forEach {
+                graph.getSuccessors(node).forEach {
                     stack.push(Pair(node, it))
                 }
             } else {
@@ -196,9 +213,9 @@ class CodeGraphTransform(
     }
 
     private fun requireNext(node: NodeId): Pair<NodeId, GraphNode> {
-        return graph.getNeighbors(node).let {
+        return graph.getSuccessors(node).let {
             when {
-                it.size != 1 -> throw IllegalArgumentException("Initial node must have exactly one outgoing edge.")
+                it.size != 1 -> throw IllegalArgumentException("Node $node must have exactly one outgoing edge, has " + it.size)
                 else -> {
                     val id = it.first()
                     return Pair(id, graph[id]!!)
@@ -208,7 +225,7 @@ class CodeGraphTransform(
     }
 
     private fun nextNodeAssertSingle(node: NodeId): NodeId {
-        return graph.getNeighbors(node).let {
+        return graph.getSuccessors(node).let {
             return@let when {
                 it.size != 1 -> throw IllegalArgumentException("Initial node must have exactly one outgoing edge.")
                 else -> it.first()
@@ -217,7 +234,7 @@ class CodeGraphTransform(
     }
 
     private fun Map.Entry<NodeId, GraphNode>.requireTwoOutgoing(): Pair<NodeId, NodeId> {
-        val neighbors = graph.getNeighbors(this.key)
+        val neighbors = graph.getSuccessors(this.key)
 
         if (neighbors.size != 2) throw IllegalStateException("Neighbor size must be two.")
         val i = neighbors.iterator()
@@ -228,7 +245,7 @@ class CodeGraphTransform(
         val ifLabel = graph[conditional, ifBody]!!
         val elseLabel: String? = graph[conditional, mergeNode]!!
         val conditionalContent = graph[conditional]!!
-        val ifBodyContent = graph[ifBody]!!
+        val ifBodyContent = graph[ifBody]!!.statements
         if (!elseLabel.equals("else", true)) {
             throw IllegalStateException("missing condition label else")
         }
@@ -238,8 +255,6 @@ class CodeGraphTransform(
 
         graph.remove(ifBody)
         graph.setEdge(conditional, mergeNode, "")
-
-
     }
 
     private fun replaceIfElse(conditional: NodeId, body1: NodeId, body2: NodeId, mergeNode: NodeId) {
@@ -279,7 +294,11 @@ class CodeGraphTransform(
 
 typealias NodeId = Int
 
-class GraphNode(var type: NodeType, var statements: String)
+class GraphNode(var type: NodeType, var statements: String) {
+    override fun toString(): String {
+        return StringBuilder().append("[").append(type).append("]\n").append(statements).append("\n").toString()
+    }
+}
 
 enum class TraversalMark { FORWARD_CROSSING, BACKWARD_CROSSING }
 
@@ -325,9 +344,14 @@ class AdjacencyMatrixGraph<N, E>(nodes: Map<NodeId, N>) {
         return nodes.filter { it.key in ids }
     }
 
-    fun getNeighbors(node: NodeId): Set<NodeId> {
-        return adjacency[node]?.keys ?: emptySet()
+    fun getSuccessors(node: NodeId): Set<NodeId> {
+        return adjacency[node].keys
     }
+
+    fun getPredecessors(node: NodeId): Set<NodeId> {
+        return adjacency.getPrev(node).keys
+    }
+
 
     inline fun filterNodes(predicate: (N) -> Boolean): Map<NodeId, N> {
         return nodes().filterValues { predicate.invoke(it) }
@@ -361,7 +385,17 @@ class AdjacencyMatrixGraph<N, E>(nodes: Map<NodeId, N>) {
     }
 
     fun remove(n: NodeId) {
-        TODO()
+        nodes.remove(n)
+        adjacency.remove(n)
+    }
+
+    override fun toString(): String {
+        val b = StringBuilder()
+        for (node in nodes) {
+            b.append("Node ").append(node.key).append(" ").append(node.value).append('\n')
+        }
+        b.append(adjacency.toString())
+        return b.toString()
     }
 }
 
@@ -382,11 +416,33 @@ class AdjacencyMatrix<E> : ImmutableAdjacencyMatrix<E> {
         return container[n1]?.let { it[n2] }
     }
 
-    override operator fun get(n1: NodeId): Map<NodeId, E>? {
-        return container[n1]
+    override operator fun get(n1: NodeId): Map<NodeId, E> {
+        return container[n1] ?: emptyMap()
+    }
+
+    fun getPrev(n: NodeId): Map<NodeId, E> {
+        val out = HashMap<NodeId, E>()
+        container.entries.forEach {
+            val edge = it.value[n]
+            if (edge != null) {
+                out[it.key] = edge
+            }
+        }
+        return out
     }
 
     fun remove(n: NodeId) {
-        TODO()
+        container.remove(n)
+        container.values.forEach { it.remove(n) }
+    }
+
+    override fun toString(): String {
+        val b = StringBuilder()
+        for (from in container.entries) {
+            for (to in from.value.entries) {
+                b.append("Edge ").append(from.key).append(" -> ").append(to.key).append(" (").append(to.value).append(")\n")
+            }
+        }
+        return b.toString()
     }
 }
