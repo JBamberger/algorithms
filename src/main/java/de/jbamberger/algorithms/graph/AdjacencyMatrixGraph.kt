@@ -65,7 +65,6 @@ class CodeGraphTransform(
             dropUselessMergeNodes()
 
 
-
             //TODO: remove
             println("##########################################")
             println(graph.toString())
@@ -94,7 +93,7 @@ class CodeGraphTransform(
                 val prevId = predecessors.first()
                 val next = requireNext(node.key)
 
-                graph[prevId, next.first] = ""
+                graph[prevId, next.first] = "" // the edges must be empty, this is required by the graph preconditioning
                 graph.remove(node.key)
             }
         }
@@ -104,7 +103,7 @@ class CodeGraphTransform(
         val decisionNodes = graph.filterNodes { it.type == NodeType.DECISION }
 
         for (d in decisionNodes.entries) {
-            val (a, b) = d.requireTwoOutgoing();
+            val (a, b) = requireTwoOutgoing(d.key);
 
             if (a == b) {
                 throw IllegalStateException("Parallel connections are not allowed.")
@@ -157,7 +156,11 @@ class CodeGraphTransform(
     }
 
     private fun replaceControlFlowLoops() {
-        //TODO()
+        val decisionNodes = graph.filterNodes { it.type == NodeType.DECISION }
+
+        for (d in decisionNodes.entries) {
+            //TODO()
+        }
     }
 
     /**
@@ -233,10 +236,11 @@ class CodeGraphTransform(
         }
     }
 
-    private fun Map.Entry<NodeId, GraphNode>.requireTwoOutgoing(): Pair<NodeId, NodeId> {
-        val neighbors = graph.getSuccessors(this.key)
-
-        if (neighbors.size != 2) throw IllegalStateException("Neighbor size must be two.")
+    private fun requireTwoOutgoing(id: NodeId): Pair<NodeId, NodeId> {
+        val neighbors = graph.getSuccessors(id)
+        if (neighbors.size != 2) {
+            throw IllegalStateException("Neighbor size must be two.")
+        }
         val i = neighbors.iterator()
         return Pair(i.next(), i.next())
     }
@@ -287,6 +291,46 @@ class CodeGraphTransform(
         graph.remove(body1)
         graph.remove(body2)
         graph.setEdge(conditional, mergeNode, "")
+    }
+
+    private fun replaceDoWhile(conditional: NodeId, body: NodeId, mergeNode: NodeId) {
+        val (f1, f2) = requireTwoOutgoing(conditional)
+        val l1 = graph[conditional, f1]!!
+        val l2 = graph[conditional, f2]!!
+        val l1IsElse = l1.equals("else", true)
+        val conditionLabel = when {
+            !l1IsElse && f1 == mergeNode -> l1
+            !l1IsElse && f1 == mergeNode -> "NOT ($l1)"
+            l1IsElse && f1 == mergeNode -> l2
+            else -> "NOT ($l2)"
+        }
+        val bodyContent = graph[body]!!
+        val conditionalContent = graph[conditional]!!
+
+        conditionalContent.statements = "DO {\n$bodyContent\n} WHILE ($conditionLabel);"
+        conditionalContent.type = NodeType.COMPUTATION
+        graph.remove(conditional, mergeNode)
+        graph[mergeNode, conditional] = ""
+        graph.remove(body)
+    }
+
+    private fun replaceWhile(conditional: NodeId, body: NodeId) {
+        val (f1, f2) = requireTwoOutgoing(conditional)
+        val l1 = graph[conditional, f1]!!
+        val l2 = graph[conditional, f2]!!
+        val l1IsElse = l1.equals("else", true)
+        val conditionLabel = when {
+            !l1IsElse && f1 == body -> l1
+            !l1IsElse && f1 == body -> "NOT ($l1)"
+            l1IsElse && f1 == body -> l2
+            else -> "NOT ($l2)"
+        }
+        val bodyContent = graph[body]!!
+        val conditionalContent = graph[conditional]!!
+
+        conditionalContent.statements = "WHILE ($conditionLabel) {\n$bodyContent\n}"
+        conditionalContent.type = NodeType.COMPUTATION
+        graph.remove(body)
     }
 }
 
@@ -384,6 +428,10 @@ class AdjacencyMatrixGraph<N, E>(nodes: Map<NodeId, N>) {
         }
     }
 
+    fun remove(n1: NodeId, n2:NodeId) {
+        adjacency.remove(n1, n2)
+    }
+
     fun remove(n: NodeId) {
         nodes.remove(n)
         adjacency.remove(n)
@@ -434,6 +482,10 @@ class AdjacencyMatrix<E> : ImmutableAdjacencyMatrix<E> {
     fun remove(n: NodeId) {
         container.remove(n)
         container.values.forEach { it.remove(n) }
+    }
+
+    fun remove(n1: NodeId, n2:NodeId) {
+        container.get(n1)?.remove(n2)
     }
 
     override fun toString(): String {
